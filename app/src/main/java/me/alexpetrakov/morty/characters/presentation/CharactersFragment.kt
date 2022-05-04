@@ -19,7 +19,7 @@ class CharactersFragment : Fragment() {
 
     private val binding get() = _binding!!
 
-    private val charactersAdapter = CharactersAdapter()
+    private val charactersAdapter = CharactersAdapter(this)
 
     override fun onCreateView(
         inflater: LayoutInflater,
