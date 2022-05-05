@@ -2,8 +2,6 @@ package me.alexpetrakov.morty.characters.presentation
 
 import androidx.recyclerview.widget.DiffUtil
 
-data class ViewState(val characters: List<CharacterUiModel>)
-
 data class CharacterUiModel(
     val id: Int,
     val name: String,

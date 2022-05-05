@@ -6,8 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.paging.PagingData
 import androidx.recyclerview.widget.LinearLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import me.alexpetrakov.morty.databinding.FragmentCharactersBinding
 
 @AndroidEntryPoint
@@ -46,11 +50,13 @@ class CharactersFragment : Fragment() {
     }
 
     private fun subscribeToModel(): Unit = with(viewModel) {
-        viewState.observe(viewLifecycleOwner, ::render)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.viewState.collectLatest(::render)
+        }
     }
 
-    private fun render(viewState: ViewState) {
-        charactersAdapter.submitList(viewState.characters)
+    private fun render(viewState: PagingData<CharacterUiModel>) {
+        charactersAdapter.submitData(viewLifecycleOwner.lifecycle, viewState)
     }
 
     override fun onDestroyView() {

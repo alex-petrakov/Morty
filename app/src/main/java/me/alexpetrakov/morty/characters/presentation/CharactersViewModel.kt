@@ -1,28 +1,28 @@
 package me.alexpetrakov.morty.characters.presentation
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.liveData
+import androidx.lifecycle.viewModelScope
+import androidx.paging.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import me.alexpetrakov.morty.characters.domain.Character
-import me.alexpetrakov.morty.characters.domain.CharactersRepository
 import javax.inject.Inject
 
 @HiltViewModel
 class CharactersViewModel @Inject constructor(
-    private val charactersRepository: CharactersRepository
+    private val charactersRepository: PagingSource<String, Character>
 ) : ViewModel() {
 
-    val viewState: LiveData<ViewState> = liveData {
-        emit(charactersRepository.getCharacters().toViewState())
-    }
+    val viewState = Pager(PagingConfig(pageSize = 20)) { charactersRepository }.flow
+        .map { pagingData -> pagingData.toPageOfUiModels() }
+        .cachedIn(viewModelScope)
 }
 
-private suspend fun List<Character>.toViewState(): ViewState {
+private suspend fun PagingData<Character>.toPageOfUiModels(): PagingData<CharacterUiModel> {
     return withContext(Dispatchers.Default) {
-        ViewState(map { it.toUiModel() })
+        map { it.toUiModel() }
     }
 }
 

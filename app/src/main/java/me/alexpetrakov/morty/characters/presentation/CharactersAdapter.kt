@@ -3,7 +3,7 @@ package me.alexpetrakov.morty.characters.presentation
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.ListAdapter
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
@@ -11,7 +11,7 @@ import me.alexpetrakov.morty.databinding.ItemCharacterBinding
 
 class CharactersAdapter(
     private val fragment: Fragment
-) : ListAdapter<CharacterUiModel, CharactersAdapter.ViewHolder>(CharacterUiModel.DiffUtilCallback) {
+) : PagingDataAdapter<CharacterUiModel, CharactersAdapter.ViewHolder>(CharacterUiModel.DiffUtilCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -27,14 +27,22 @@ class CharactersAdapter(
         private val binding: ItemCharacterBinding,
         private val fragment: Fragment
     ) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(character: CharacterUiModel): Unit = with(binding) {
+
+        fun bind(character: CharacterUiModel?): Unit = with(binding) {
+            val imageUrl = character?.imageUrl ?: ""
+            val name = character?.name ?: ""
+            val description = character?.description ?: ""
+            loadImage(imageUrl)
+            nameTextView.text = name
+            descriptionTextView.text = description
+        }
+
+        private fun ItemCharacterBinding.loadImage(imageUrl: String) {
             Glide.with(fragment)
-                .load(character.imageUrl)
+                .load(imageUrl)
                 .circleCrop()
                 .transition(withCrossFade())
                 .into(avatarImageView)
-            nameTextView.text = character.name
-            descriptionTextView.text = character.description
         }
     }
 }
