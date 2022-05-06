@@ -33,6 +33,12 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:indeterminate="true" />
+
+        <include
+            android:id="@+id/error_layout"
+            layout="@layout/layout_error_view"
+            android:visibility="gone"
+            tools:visibility="visible" />
     </FrameLayout>
 
 </LinearLayout>

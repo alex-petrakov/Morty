@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">Morty</string>
     <string name="app_characters">Characters</string>
+    <string name="app_cant_connect_to_the_server">Can\'t connect to the server</string>
+    <string name="app_action_retry">Retry</string>
 </resources>

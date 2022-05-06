@@ -50,6 +50,9 @@ class CharactersFragment : Fragment() {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = charactersAdapter
         }
+        binding.errorLayout.retryButton.setOnClickListener {
+            charactersAdapter.refresh()
+        }
     }
 
     private fun subscribeToModel(): Unit = with(viewModel) {
@@ -70,6 +73,7 @@ class CharactersFragment : Fragment() {
         val refreshState = loadStates.refresh
         if (refreshState is LoadState.Loading) progressBar.show() else progressBar.hide()
         recyclerView.isVisible = refreshState is LoadState.NotLoading
+        binding.errorLayout.root.isVisible = refreshState is LoadState.Error
     }
 
     override fun onDestroyView() {
