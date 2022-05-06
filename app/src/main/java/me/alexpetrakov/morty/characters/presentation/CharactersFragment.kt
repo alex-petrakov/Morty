@@ -48,7 +48,10 @@ class CharactersFragment : Fragment() {
         recyclerView.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(requireContext())
-            adapter = charactersAdapter
+            adapter = charactersAdapter.withLoadStateHeaderAndFooter(
+                header = CharactersLoadStateAdapter { charactersAdapter.retry() },
+                footer = CharactersLoadStateAdapter { charactersAdapter.retry() },
+            )
         }
         binding.errorLayout.retryButton.setOnClickListener {
             charactersAdapter.refresh()
