@@ -32,7 +32,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:indeterminate="true" />
+            android:indeterminate="true"
+            app:minHideDelay="300"
+            app:showDelay="50" />
 
         <include
             android:id="@+id/error_layout"
