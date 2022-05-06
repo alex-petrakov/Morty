@@ -8,14 +8,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import me.alexpetrakov.morty.characters.domain.Character
+import me.alexpetrakov.morty.characters.domain.CharactersRepository
 import javax.inject.Inject
 
 @HiltViewModel
 class CharactersViewModel @Inject constructor(
-    private val charactersRepository: PagingSource<String, Character>
+    private val repository: CharactersRepository
 ) : ViewModel() {
 
-    val viewState = Pager(PagingConfig(pageSize = 20)) { charactersRepository }.flow
+    val viewState = Pager(PagingConfig(pageSize = 20)) { repository.getCharacters() }.flow
         .map { pagingData -> pagingData.toPageOfUiModels() }
         .cachedIn(viewModelScope)
 }
