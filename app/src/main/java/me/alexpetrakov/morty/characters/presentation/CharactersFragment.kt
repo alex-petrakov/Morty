@@ -4,9 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.paging.CombinedLoadStates
+import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.recyclerview.widget.LinearLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
@@ -53,10 +56,20 @@ class CharactersFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.viewState.collectLatest(::render)
         }
+        viewLifecycleOwner.lifecycleScope.launch {
+            charactersAdapter.loadStateFlow.collectLatest(::render)
+        }
+        charactersAdapter.loadStateFlow
     }
 
     private fun render(viewState: PagingData<CharacterUiModel>) {
         charactersAdapter.submitData(viewLifecycleOwner.lifecycle, viewState)
+    }
+
+    private fun render(loadStates: CombinedLoadStates): Unit = with(binding) {
+        val refreshState = loadStates.refresh
+        if (refreshState is LoadState.Loading) progressBar.show() else progressBar.hide()
+        recyclerView.isVisible = refreshState is LoadState.NotLoading
     }
 
     override fun onDestroyView() {
