@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import me.alexpetrakov.morty.R
 import me.alexpetrakov.morty.databinding.FragmentCharactersBinding
 
 @AndroidEntryPoint
@@ -53,9 +54,12 @@ class CharactersFragment : Fragment() {
                 footer = CharactersLoadStateAdapter { charactersAdapter.retry() },
             )
         }
-        binding.errorLayout.retryButton.setOnClickListener {
-            charactersAdapter.refresh()
+        swipeRefreshLayout.apply {
+            setProgressViewEndTarget(true, progressViewEndOffset)
+            setColorSchemeResources(R.color.primary)
+            setOnRefreshListener { charactersAdapter.refresh() }
         }
+        binding.errorLayout.retryButton.setOnClickListener { charactersAdapter.refresh() }
     }
 
     private fun subscribeToModel(): Unit = with(viewModel) {
@@ -74,8 +78,14 @@ class CharactersFragment : Fragment() {
 
     private fun render(loadStates: CombinedLoadStates): Unit = with(binding) {
         val refreshState = loadStates.refresh
-        if (refreshState is LoadState.Loading) progressBar.show() else progressBar.hide()
-        recyclerView.isVisible = refreshState is LoadState.NotLoading
+        val isRefreshing = refreshState is LoadState.Loading && swipeRefreshLayout.isRefreshing
+        val isLoading = refreshState is LoadState.Loading && !swipeRefreshLayout.isRefreshing
+
+        if (isLoading) progressBar.show() else progressBar.hide()
+
+        swipeRefreshLayout.isRefreshing = isRefreshing
+
+        swipeRefreshLayout.isVisible = refreshState is LoadState.NotLoading || isRefreshing
         binding.errorLayout.root.isVisible = refreshState is LoadState.Error
     }
 
