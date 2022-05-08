@@ -7,14 +7,15 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.recyclerview.widget.LinearLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import me.alexpetrakov.morty.R
 import me.alexpetrakov.morty.databinding.FragmentCharactersBinding
 
@@ -44,7 +45,6 @@ class CharactersFragment : Fragment() {
         subscribeToModel()
     }
 
-
     private fun prepareView(): Unit = with(binding) {
         recyclerView.apply {
             setHasFixedSize(true)
@@ -63,13 +63,14 @@ class CharactersFragment : Fragment() {
     }
 
     private fun subscribeToModel(): Unit = with(viewModel) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.viewState.collectLatest(::render)
-        }
-        viewLifecycleOwner.lifecycleScope.launch {
-            charactersAdapter.loadStateFlow.collectLatest(::render)
-        }
+        viewModel.viewState
+            .onEach(::render)
+            .flowWithLifecycle(viewLifecycleOwner.lifecycle)
+            .launchIn(viewLifecycleOwner.lifecycleScope)
         charactersAdapter.loadStateFlow
+            .onEach(::render)
+            .flowWithLifecycle(viewLifecycleOwner.lifecycle)
+            .launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
     private fun render(viewState: PagingData<CharacterUiModel>) {
