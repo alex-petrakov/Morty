@@ -13,6 +13,7 @@ import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.elevation.ElevationOverlayProvider
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -55,8 +56,11 @@ class CharactersFragment : Fragment() {
             )
         }
         swipeRefreshLayout.apply {
-            setProgressViewEndTarget(true, progressViewEndOffset)
+            val surfaceColorAt3Dp = ElevationOverlayProvider(requireContext())
+                .compositeOverlayWithThemeSurfaceColorIfNeeded(3f)
+            setProgressBackgroundColorSchemeColor(surfaceColorAt3Dp)
             setColorSchemeResources(R.color.primary)
+            setProgressViewEndTarget(true, progressViewEndOffset)
             setOnRefreshListener { charactersAdapter.refresh() }
         }
         binding.errorLayout.retryButton.setOnClickListener { charactersAdapter.refresh() }
