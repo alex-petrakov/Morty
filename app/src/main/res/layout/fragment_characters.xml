@@ -8,18 +8,20 @@
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar_layout"
+        style="@style/Widget.MaterialComponents.AppBarLayout.PrimarySurface"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:elevation="4dp"
         app:liftOnScroll="true"
         app:liftOnScrollTargetViewId="@id/recycler_view">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
-            style="@style/Widget.MaterialComponents.Toolbar.Surface"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:elevation="@dimen/toolbar_elevation"
-            app:title="@string/app_characters" />
+            android:elevation="0dp"
+            app:title="@string/app_characters"
+            app:titleTextColor="?colorOnPrimarySurface" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <FrameLayout
