@@ -9,10 +9,29 @@ data class Character(
     val imageUrl: String
 )
 
-enum class Gender {
-    MALE, FEMALE, GENDERLESS, UNKNOWN
+enum class Gender(val id: Int) {
+    MALE(0),
+    FEMALE(1),
+    GENDERLESS(2),
+    UNKNOWN(3);
+
+    companion object {
+        fun from(id: Int): Gender {
+            return values().find { it.id == id }
+                ?: throw IllegalArgumentException("Unexpected id: $id")
+        }
+    }
 }
 
-enum class VitalStatus {
-    ALIVE, DEAD, UNKNOWN
+enum class VitalStatus(val id: Int) {
+    ALIVE(0),
+    DEAD(1),
+    UNKNOWN(2);
+
+    companion object {
+        fun from(id: Int): VitalStatus {
+            return values().find { it.id == id }
+                ?: throw IllegalArgumentException("Unexpected id: $id")
+        }
+    }
 }
