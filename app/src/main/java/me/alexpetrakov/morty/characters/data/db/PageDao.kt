@@ -8,7 +8,7 @@ import androidx.room.Query
 interface PageDao {
 
     @Insert
-    suspend fun insert(pageEntity: PageEntity)
+    suspend fun insert(pageEntity: PageEntity): Long
 
     @Query("SELECT * FROM pages WHERE id = (SELECT page_id FROM characters WHERE id = :characterId)")
     suspend fun getByCharacterId(characterId: Int): PageEntity?

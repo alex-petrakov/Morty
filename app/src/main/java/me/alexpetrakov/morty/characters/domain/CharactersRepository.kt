@@ -1,8 +1,9 @@
 package me.alexpetrakov.morty.characters.domain
 
-import androidx.paging.PagingSource
+import androidx.paging.PagingData
+import kotlinx.coroutines.flow.Flow
 
 interface CharactersRepository {
 
-    fun getCharacters(): PagingSource<String, Character>
+    fun getCharacters(): Flow<PagingData<Character>>
 }
