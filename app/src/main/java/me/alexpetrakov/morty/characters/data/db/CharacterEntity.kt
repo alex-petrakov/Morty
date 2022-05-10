@@ -13,8 +13,8 @@ import me.alexpetrakov.morty.characters.domain.VitalStatus
     foreignKeys = [
         ForeignKey(
             entity = PageEntity::class,
-            parentColumns = ["id"],
-            childColumns = ["page_id"],
+            parentColumns = ["url"],
+            childColumns = ["page_url"],
             onDelete = CASCADE,
             onUpdate = CASCADE
         )
@@ -22,7 +22,7 @@ import me.alexpetrakov.morty.characters.domain.VitalStatus
 )
 data class CharacterEntity(
     @PrimaryKey @ColumnInfo(name = "id") val id: Int,
-    @ColumnInfo(name = "page_id") val pageId: Int,
+    @ColumnInfo(name = "page_url") val pageUrl: String,
     @ColumnInfo(name = "name") val name: String,
     @ColumnInfo(name = "species") val species: String,
     @ColumnInfo(name = "gender") val gender: Gender,

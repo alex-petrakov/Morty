@@ -54,10 +54,8 @@ class CharactersRemoteMediator(
             if (refresh) {
                 pageDao.deleteAll()
             }
-            val generatedPageId = pageDao.insert(
-                PageEntity(0, pageUrl, response.nextPageUrl, response.prevPageUrl)
-            ).toInt()
-            characterDao.insertAll(response.characters.toEntities(generatedPageId))
+            pageDao.insert(PageEntity(pageUrl, response.nextPageUrl, response.prevPageUrl))
+            characterDao.insertAll(response.characters.toEntities(pageUrl))
         }
 
         return MediatorResult.Success(
@@ -114,12 +112,12 @@ private val CharacterPageJson.nextPageUrl get() = pageInfo.nextUrl
 
 private val CharacterPageJson.prevPageUrl get() = pageInfo.previousUrl
 
-private suspend fun List<CharacterJson>.toEntities(pageId: Int): List<CharacterEntity> {
+private suspend fun List<CharacterJson>.toEntities(pageUrl: String): List<CharacterEntity> {
     return withContext(Dispatchers.Default) {
-        map { it.toEntity(pageId) }
+        map { it.toEntity(pageUrl) }
     }
 }
 
-private fun CharacterJson.toEntity(pageId: Int): CharacterEntity {
-    return CharacterEntity(id, pageId, name, species, gender, vitalStatus, imageUrl)
+private fun CharacterJson.toEntity(pageUrl: String): CharacterEntity {
+    return CharacterEntity(id, pageUrl, name, species, gender, vitalStatus, imageUrl)
 }
