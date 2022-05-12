@@ -9,13 +9,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.paging.CombinedLoadStates
-import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.elevation.ElevationOverlayProvider
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import me.alexpetrakov.morty.R
 import me.alexpetrakov.morty.databinding.FragmentCharactersBinding
@@ -72,6 +72,8 @@ class CharactersFragment : Fragment() {
             .flowWithLifecycle(viewLifecycleOwner.lifecycle)
             .launchIn(viewLifecycleOwner.lifecycleScope)
         charactersAdapter.loadStateFlow
+            .map { CompoundPagingState.from(it) }
+            .distinctUntilChanged()
             .onEach(::render)
             .flowWithLifecycle(viewLifecycleOwner.lifecycle)
             .launchIn(viewLifecycleOwner.lifecycleScope)
@@ -81,17 +83,21 @@ class CharactersFragment : Fragment() {
         charactersAdapter.submitData(viewLifecycleOwner.lifecycle, viewState)
     }
 
-    private fun render(loadStates: CombinedLoadStates): Unit = with(binding) {
-        val refreshState = loadStates.refresh
-        val isRefreshing = refreshState is LoadState.Loading && swipeRefreshLayout.isRefreshing
-        val isLoading = refreshState is LoadState.Loading && !swipeRefreshLayout.isRefreshing
+    private fun render(pagingState: CompoundPagingState): Unit = with(binding) {
+        val uiState = ViewState.of(
+            pagingState,
+            isRefreshing = swipeRefreshLayout.isRefreshing,
+            hasLocalData = charactersAdapter.itemCount > 0
+        )
 
-        if (isLoading) progressBar.show() else progressBar.hide()
+        if (uiState == ViewState.LOADING_FIRST_PAGE) progressBar.show() else progressBar.hide()
 
-        swipeRefreshLayout.isRefreshing = isRefreshing
+        swipeRefreshLayout.isRefreshing = uiState == ViewState.REFRESHING
 
-        swipeRefreshLayout.isVisible = refreshState is LoadState.NotLoading || isRefreshing
-        binding.errorLayout.root.isVisible = refreshState is LoadState.Error
+        swipeRefreshLayout.isVisible = uiState == ViewState.REFRESHING ||
+                uiState == ViewState.REFRESH_ERROR ||
+                uiState == ViewState.CONTENT
+        binding.errorLayout.root.isVisible = uiState == ViewState.ERROR
     }
 
     override fun onDestroyView() {
