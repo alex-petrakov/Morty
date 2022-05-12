@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy.REPLACE
 import androidx.room.Query
+import java.time.Instant
 
 @Dao
 interface PageDao {
@@ -16,4 +17,7 @@ interface PageDao {
 
     @Query("DELETE FROM pages")
     suspend fun deleteAll()
+
+    @Query("SELECT MIN(updated_at) FROM pages")
+    suspend fun lastUpdateInstant(): Instant?
 }

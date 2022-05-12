@@ -15,6 +15,8 @@ import me.alexpetrakov.morty.characters.data.network.CharacterPageJson
 import me.alexpetrakov.morty.characters.data.network.RickAndMortyApi
 import retrofit2.HttpException
 import java.io.IOException
+import java.time.Duration
+import java.time.Instant
 
 @OptIn(ExperimentalPagingApi::class)
 class CharactersRemoteMediator(
@@ -27,7 +29,14 @@ class CharactersRemoteMediator(
     private val pageDao = db.pageDao()
 
     override suspend fun initialize(): InitializeAction {
-        return super.initialize() // TODO: Set cache refresh timeout
+        val now = Instant.now()
+        val updatedAt = pageDao.lastUpdateInstant() ?: Instant.MIN
+        val actualCacheLifetime = Duration.between(updatedAt, now)
+        return if (actualCacheLifetime.isNegative || actualCacheLifetime > MAX_CACHE_LIFETIME) {
+            InitializeAction.LAUNCH_INITIAL_REFRESH
+        } else {
+            InitializeAction.SKIP_INITIAL_REFRESH
+        }
     }
 
     override suspend fun load(
@@ -54,7 +63,9 @@ class CharactersRemoteMediator(
             if (refresh) {
                 pageDao.deleteAll()
             }
-            pageDao.insert(PageEntity(pageUrl, response.nextPageUrl, response.prevPageUrl))
+            pageDao.insert(
+                PageEntity(pageUrl, response.nextPageUrl, response.prevPageUrl, Instant.now())
+            )
             characterDao.insertAll(response.characters.toEntities(pageUrl))
         }
 
@@ -103,6 +114,10 @@ class CharactersRemoteMediator(
         } else {
             api.getCharacterPage(pageUrl)
         }
+    }
+
+    companion object {
+        private val MAX_CACHE_LIFETIME = Duration.ofHours(1)
     }
 }
 
