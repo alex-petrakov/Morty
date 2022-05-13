@@ -10,17 +10,22 @@ enum class CompoundPagingState {
 
     companion object {
         fun of(sourceState: LoadState, mediatorState: LoadState): CompoundPagingState {
-            return when {
-                sourceState is NotLoading && mediatorState is NotLoading -> CONTENT
-                sourceState is NotLoading && mediatorState is Loading -> LOADING
-                sourceState is NotLoading && mediatorState is Error -> REMOTE_ERROR
-                sourceState is Loading && mediatorState is NotLoading -> CONTENT
-                sourceState is Loading && mediatorState is Loading -> LOADING
-                sourceState is Loading && mediatorState is Error -> LOADING
-                sourceState is Error && mediatorState is NotLoading -> ERROR
-                sourceState is Error && mediatorState is Loading -> ERROR
-                sourceState is Error && mediatorState is Error -> ERROR
-                else -> throw IllegalStateException("Unexpected state")
+            return when (sourceState) {
+                is NotLoading -> when (mediatorState) {
+                    is NotLoading -> CONTENT
+                    Loading -> LOADING
+                    is Error -> REMOTE_ERROR
+                }
+                Loading -> when (mediatorState) {
+                    is NotLoading -> CONTENT
+                    Loading -> LOADING
+                    is Error -> LOADING
+                }
+                is Error -> when (mediatorState) {
+                    is NotLoading -> ERROR
+                    Loading -> ERROR
+                    is Error -> ERROR
+                }
             }
         }
 
