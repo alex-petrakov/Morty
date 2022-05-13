@@ -65,7 +65,7 @@ class CharactersFragment : Fragment() {
     }
 
     private fun subscribeToModel(): Unit = with(viewModel) {
-        viewModel.viewState
+        viewModel.pagingData
             .onEach(::render)
             .flowWithLifecycle(viewLifecycleOwner.lifecycle)
             .launchIn(viewLifecycleOwner.lifecycleScope)
@@ -108,8 +108,8 @@ class CharactersFragment : Fragment() {
         }
     }
 
-    private fun render(viewState: PagingData<CharacterUiModel>) {
-        charactersAdapter.submitData(viewLifecycleOwner.lifecycle, viewState)
+    private fun render(pagingData: PagingData<CharacterUiModel>) {
+        charactersAdapter.submitData(viewLifecycleOwner.lifecycle, pagingData)
     }
 
     private fun render(viewState: ViewState): Unit = with(binding) {

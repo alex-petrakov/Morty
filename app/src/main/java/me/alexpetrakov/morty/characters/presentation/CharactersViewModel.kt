@@ -18,12 +18,12 @@ class CharactersViewModel @Inject constructor(
     repository: CharactersRepository
 ) : ViewModel() {
 
-    val viewState = repository.getCharacters()
-        .map { pagingData -> pagingData.toPageOfUiModels() }
+    val pagingData = repository.getCharacters()
+        .map { pagingData -> pagingData.toPagingDataOfUiModels() }
         .cachedIn(viewModelScope)
 }
 
-private suspend fun PagingData<Character>.toPageOfUiModels(): PagingData<CharacterUiModel> {
+private suspend fun PagingData<Character>.toPagingDataOfUiModels(): PagingData<CharacterUiModel> {
     return withContext(Dispatchers.Default) {
         map { it.toUiModel() }
     }
