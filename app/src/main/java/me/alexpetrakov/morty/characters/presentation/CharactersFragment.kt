@@ -8,7 +8,6 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
-import androidx.lifecycle.lifecycleScope
 import androidx.paging.PagingData
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.elevation.ElevationOverlayProvider
@@ -16,6 +15,8 @@ import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.*
 import me.alexpetrakov.morty.R
+import me.alexpetrakov.morty.common.presentation.extensions.viewLifecycle
+import me.alexpetrakov.morty.common.presentation.extensions.viewLifecycleScope
 import me.alexpetrakov.morty.databinding.FragmentCharactersBinding
 
 @AndroidEntryPoint
@@ -67,8 +68,8 @@ class CharactersFragment : Fragment() {
     private fun subscribeToModel(): Unit = with(viewModel) {
         viewModel.pagingData
             .onEach(::render)
-            .flowWithLifecycle(viewLifecycleOwner.lifecycle)
-            .launchIn(viewLifecycleOwner.lifecycleScope)
+            .flowWithLifecycle(viewLifecycle)
+            .launchIn(viewLifecycleScope)
 
         val viewStates = charactersAdapter.loadStateFlow
             .map { CompoundPagingState.from(it) }
@@ -83,15 +84,15 @@ class CharactersFragment : Fragment() {
 
         viewStates
             .onEach(::render)
-            .flowWithLifecycle(viewLifecycleOwner.lifecycle)
-            .launchIn(viewLifecycleOwner.lifecycleScope)
+            .flowWithLifecycle(viewLifecycle)
+            .launchIn(viewLifecycleScope)
 
         viewStates
             .withPrevious()
             .mapNotNull(::statesToViewEffect)
             .onEach(::handle)
-            .flowWithLifecycle(viewLifecycleOwner.lifecycle)
-            .launchIn(viewLifecycleOwner.lifecycleScope)
+            .flowWithLifecycle(viewLifecycle)
+            .launchIn(viewLifecycleScope)
     }
 
     private fun Flow<ViewState>.withPrevious(): Flow<Pair<ViewState?, ViewState>> {
@@ -109,7 +110,7 @@ class CharactersFragment : Fragment() {
     }
 
     private fun render(pagingData: PagingData<CharacterUiModel>) {
-        charactersAdapter.submitData(viewLifecycleOwner.lifecycle, pagingData)
+        charactersAdapter.submitData(viewLifecycle, pagingData)
     }
 
     private fun render(viewState: ViewState): Unit = with(binding) {
