@@ -62,6 +62,10 @@ enum class ViewState {
     }
 }
 
+enum class ViewEffect {
+    DISPLAY_REFRESH_ERROR
+}
+
 data class CharacterUiModel(
     val id: Int,
     val name: String,
