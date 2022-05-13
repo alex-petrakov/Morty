@@ -4,4 +4,10 @@
     <string name="app_cant_connect_to_the_server">Can\'t connect to the server</string>
     <string name="app_action_retry">Retry</string>
     <string name="app_unable_to_refresh">Unable to refresh data</string>
+    <string name="app_alive">Alive</string>
+    <string name="app_dead">Dead</string>
+    <string name="app_unknown">Unknown</string>
+    <string name="app_male">Male</string>
+    <string name="app_female">Female</string>
+    <string name="app_genderless">Genderless</string>
 </resources>
