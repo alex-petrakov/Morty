@@ -28,7 +28,10 @@ class CharactersFragment : Fragment() {
 
     private val binding get() = _binding!!
 
-    private val charactersAdapter = CharactersAdapter(this)
+    private val charactersAdapter = CharactersAdapter(
+        this,
+        onCharacterClick = { character -> viewModel.onCharacterClicked(character) }
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater,

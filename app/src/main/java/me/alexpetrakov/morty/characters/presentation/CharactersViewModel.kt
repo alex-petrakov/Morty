@@ -5,10 +5,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
+import com.github.terrakok.cicerone.Router
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import me.alexpetrakov.morty.AppScreens
 import me.alexpetrakov.morty.R
 import me.alexpetrakov.morty.characters.domain.Character
 import me.alexpetrakov.morty.characters.domain.CharactersRepository
@@ -20,12 +22,17 @@ import javax.inject.Inject
 @HiltViewModel
 class CharactersViewModel @Inject constructor(
     repository: CharactersRepository,
-    private val resourceProvider: ResourceProvider
+    private val resourceProvider: ResourceProvider,
+    private val router: Router
 ) : ViewModel() {
 
     val pagingData = repository.getCharacters()
         .map { pagingData -> pagingData.toPagingDataOfUiModels(resourceProvider) }
         .cachedIn(viewModelScope)
+
+    fun onCharacterClicked(character: CharacterUiModel) {
+        router.navigateTo(AppScreens.characterDetails(character.id))
+    }
 }
 
 private suspend fun PagingData<Character>.toPagingDataOfUiModels(

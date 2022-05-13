@@ -40,8 +40,10 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:indeterminate="true"
+            android:visibility="gone"
             app:minHideDelay="300"
-            app:showDelay="50" />
+            app:showDelay="50"
+            tools:visibility="visible" />
 
         <include
             android:id="@+id/error_layout"

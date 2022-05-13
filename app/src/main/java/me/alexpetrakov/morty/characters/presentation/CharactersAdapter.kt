@@ -10,13 +10,18 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withC
 import me.alexpetrakov.morty.databinding.ItemCharacterBinding
 
 class CharactersAdapter(
-    private val fragment: Fragment
+    private val fragment: Fragment,
+    private val onCharacterClick: (character: CharacterUiModel) -> Unit
 ) : PagingDataAdapter<CharacterUiModel, CharactersAdapter.ViewHolder>(CharacterUiModel.DiffUtilCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
         val binding = ItemCharacterBinding.inflate(layoutInflater, parent, false)
-        return ViewHolder(binding, fragment)
+        return ViewHolder(
+            binding,
+            fragment,
+            onClick = { position -> getItem(position)?.let(onCharacterClick) }
+        )
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -25,8 +30,18 @@ class CharactersAdapter(
 
     class ViewHolder(
         private val binding: ItemCharacterBinding,
-        private val fragment: Fragment
+        private val fragment: Fragment,
+        private val onClick: (position: Int) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
+
+        init {
+            binding.root.setOnClickListener {
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onClick(position)
+                }
+            }
+        }
 
         fun bind(character: CharacterUiModel?): Unit = with(binding) {
             val imageUrl = character?.imageUrl ?: ""
