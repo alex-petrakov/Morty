@@ -43,6 +43,28 @@ class CharactersRemoteMediator(
         loadType: LoadType,
         state: PagingState<Int, CharacterEntity>
     ): MediatorResult {
+        val pageUrl = when (val action = determineNextActionFor(loadType, state)) {
+            Action.Finish -> return MediatorResult.Success(endOfPaginationReached = true)
+            Action.SkipPage -> return MediatorResult.Success(endOfPaginationReached = false)
+            is Action.LoadPage -> action.pageUrl
+        }
+
+        val response = try {
+            api.getCharacterPage(pageUrl)
+        } catch (e: IOException) {
+            return MediatorResult.Error(e)
+        } catch (e: HttpException) {
+            return MediatorResult.Error(e)
+        }
+
+        cacheResponse(response, pageUrl, invalidateCache = loadType == LoadType.REFRESH)
+        return MediatorResult.Success(endOfPaginationReached = !response.hasMorePages)
+    }
+
+    private suspend fun determineNextActionFor(
+        loadType: LoadType,
+        state: PagingState<Int, CharacterEntity>
+    ): Action {
         return when (loadType) {
             LoadType.REFRESH -> refresh(state)
             LoadType.PREPEND -> prepend(state)
@@ -50,17 +72,41 @@ class CharactersRemoteMediator(
         }
     }
 
-    private suspend fun loadAndStore(pageUrl: String, refresh: Boolean): MediatorResult {
-        val response = try {
-            loadCharacterPage(pageUrl)
-        } catch (e: IOException) {
-            return MediatorResult.Error(e)
-        } catch (e: HttpException) {
-            return MediatorResult.Error(e)
-        }
+    private suspend fun refresh(
+        state: PagingState<Int, CharacterEntity>,
+        firstPageUrl: String = RickAndMortyApi.FIRST_CHARACTER_PAGE_URL
+    ): Action {
+        val lastAccessedCharacter = state.lastAccessedCharacter
+        val currentPage = getPageFor(lastAccessedCharacter)
+        val pageUrl = currentPage?.url ?: firstPageUrl
+        return Action.LoadPage(pageUrl)
+    }
 
+    private suspend fun append(state: PagingState<Int, CharacterEntity>): Action {
+        val lastCharacter = state.lastItemOrNull()
+        val currentPage = getPageFor(lastCharacter) ?: return Action.SkipPage
+        val pageUrl = currentPage.nextPageUrl ?: return Action.Finish
+        return Action.LoadPage(pageUrl)
+    }
+
+    private suspend fun prepend(state: PagingState<Int, CharacterEntity>): Action {
+        val firstCharacter = state.firstItemOrNull()
+        val currentPage = getPageFor(firstCharacter) ?: return Action.SkipPage
+        val pageUrl = currentPage.previousPageUrl ?: return Action.Finish
+        return Action.LoadPage(pageUrl)
+    }
+
+    private suspend fun getPageFor(firstCharacter: CharacterEntity?): PageEntity? {
+        return firstCharacter?.let { pageDao.getByCharacterId(it.id) }
+    }
+
+    private suspend fun cacheResponse(
+        response: CharacterPageJson,
+        pageUrl: String,
+        invalidateCache: Boolean
+    ) {
         db.withTransaction {
-            if (refresh) {
+            if (invalidateCache) {
                 pageDao.deleteAll()
             }
             pageDao.insert(
@@ -68,58 +114,21 @@ class CharactersRemoteMediator(
             )
             characterDao.insertAll(response.characters.toEntities(pageUrl))
         }
-
-        return MediatorResult.Success(
-            endOfPaginationReached = !response.hasMorePages
-        )
     }
 
-    private suspend fun refresh(
-        state: PagingState<Int, CharacterEntity>,
-        firstPageUrl: String = RickAndMortyApi.FIRST_CHARACTER_PAGE_URL
-    ): MediatorResult {
-        val lastAccessedCharacter = state.lastAccessedCharacter
-        val currentPage = lastAccessedCharacter?.let { pageDao.getByCharacterId(it.id) }
-        val pageUrl = currentPage?.url ?: firstPageUrl
-        return loadAndStore(pageUrl, refresh = true)
-    }
-
-    private suspend fun append(state: PagingState<Int, CharacterEntity>): MediatorResult {
-        val lastCharacter = state.lastItemOrNull()
-        val currentPage =
-            lastCharacter?.let { pageDao.getByCharacterId(it.id) } ?: return MediatorResult.Success(
-                endOfPaginationReached = false
-            )
-        val pageUrl =
-            currentPage.nextPageUrl ?: return MediatorResult.Success(endOfPaginationReached = true)
-        return loadAndStore(pageUrl, refresh = false)
-    }
-
-    private suspend fun prepend(state: PagingState<Int, CharacterEntity>): MediatorResult {
-        val firstCharacter = state.firstItemOrNull()
-        val currentPage = firstCharacter?.let { pageDao.getByCharacterId(it.id) }
-            ?: return MediatorResult.Success(endOfPaginationReached = false)
-        val pageUrl = currentPage.previousPageUrl ?: return MediatorResult.Success(
-            endOfPaginationReached = true
-        )
-        return loadAndStore(pageUrl, refresh = false)
-    }
-
-    private val PagingState<Int, CharacterEntity>.lastAccessedCharacter: CharacterEntity?
-        get() = anchorPosition?.let { closestItemToPosition(it) }
-
-    private suspend fun loadCharacterPage(pageUrl: String? = null): CharacterPageJson {
-        return if (pageUrl == null) {
-            api.getCharacterPage()
-        } else {
-            api.getCharacterPage(pageUrl)
-        }
+    private sealed class Action {
+        object Finish : Action()
+        object SkipPage : Action()
+        data class LoadPage(val pageUrl: String) : Action()
     }
 
     companion object {
         private val MAX_CACHE_LIFETIME = Duration.ofHours(1)
     }
 }
+
+private val PagingState<Int, CharacterEntity>.lastAccessedCharacter: CharacterEntity?
+    get() = anchorPosition?.let { closestItemToPosition(it) }
 
 private val CharacterPageJson.hasMorePages get() = pageInfo.nextUrl != null
 
