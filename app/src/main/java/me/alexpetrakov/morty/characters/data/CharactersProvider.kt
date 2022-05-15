@@ -6,8 +6,7 @@ import kotlinx.coroutines.flow.map
 import me.alexpetrakov.morty.characters.data.db.CharacterDatabase
 import me.alexpetrakov.morty.characters.data.db.CharacterEntity
 import me.alexpetrakov.morty.characters.data.network.RickAndMortyApi
-import me.alexpetrakov.morty.characters.domain.Character
-import me.alexpetrakov.morty.characters.domain.CharactersRepository
+import me.alexpetrakov.morty.characters.domain.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -32,6 +31,21 @@ class CharactersProvider @Inject constructor(
 
     private fun CharacterEntity.toDomainModel(): Character {
         return Character(id, name, species, gender, vitalStatus, imageUrl)
+    }
+
+    override suspend fun getCharacter(id: Int): CharacterDetails? {
+        return CharacterDetails(
+            1,
+            "Rick Sanchez",
+            "Human",
+            Gender.MALE,
+            VitalStatus.ALIVE,
+            "Earth",
+            "Citadel of Ricks",
+            Episode(1, "Pilot", "S01E01"),
+            51,
+            "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
+        )
     }
 
     companion object {

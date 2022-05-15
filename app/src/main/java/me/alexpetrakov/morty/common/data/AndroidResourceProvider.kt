@@ -14,4 +14,8 @@ class AndroidResourceProvider @Inject constructor(
     private val resources = context.resources
 
     override fun getString(id: Int): String = resources.getString(id)
+
+    override fun getQuantityString(id: Int, quantity: Int, vararg formatArgs: Any): String {
+        return resources.getQuantityString(id, quantity, *formatArgs)
+    }
 }

@@ -11,12 +11,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import me.alexpetrakov.morty.AppScreens
-import me.alexpetrakov.morty.R
 import me.alexpetrakov.morty.characters.domain.Character
 import me.alexpetrakov.morty.characters.domain.CharactersRepository
-import me.alexpetrakov.morty.characters.domain.Gender
-import me.alexpetrakov.morty.characters.domain.VitalStatus
 import me.alexpetrakov.morty.common.domain.ResourceProvider
+import me.alexpetrakov.morty.common.presentation.mappers.toUiModel
 import javax.inject.Inject
 
 @HiltViewModel
@@ -48,23 +46,4 @@ private fun Character.toUiModel(resourceProvider: ResourceProvider): CharacterUi
     val vitalStatus = vitalStatus.toUiModel(resourceProvider)
     val gender = gender.toUiModel(resourceProvider)
     return CharacterUiModel(id, name, "$vitalStatus · $species · $gender", imageUrl)
-}
-
-private fun VitalStatus.toUiModel(resourceProvider: ResourceProvider): String {
-    val id = when (this) {
-        VitalStatus.ALIVE -> R.string.app_alive
-        VitalStatus.DEAD -> R.string.app_dead
-        VitalStatus.UNKNOWN -> R.string.app_unknown
-    }
-    return resourceProvider.getString(id)
-}
-
-private fun Gender.toUiModel(resourceProvider: ResourceProvider): String {
-    val id = when (this) {
-        Gender.MALE -> R.string.app_male
-        Gender.FEMALE -> R.string.app_female
-        Gender.GENDERLESS -> R.string.app_genderless
-        Gender.UNKNOWN -> R.string.app_unknown
-    }
-    return resourceProvider.getString(id)
 }
