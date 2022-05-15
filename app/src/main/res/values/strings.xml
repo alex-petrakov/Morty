@@ -10,4 +10,8 @@
     <string name="app_male">Male</string>
     <string name="app_female">Female</string>
     <string name="app_genderless">Genderless</string>
+    <string name="app_origin">Origin</string>
+    <string name="app_last_known_location">Last known location</string>
+    <string name="app_first_seen_in">First seen in</string>
+    <string name="app_seen_in">Seen in</string>
 </resources>

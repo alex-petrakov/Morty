@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <com.google.android.material.appbar.MaterialToolbar
@@ -10,7 +11,95 @@
         style="@style/Widget.MaterialComponents.Toolbar.PrimarySurface"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:navigationIcon="@drawable/ic_action_up"
-        android:elevation="4dp" />
+        android:elevation="4dp"
+        app:navigationIcon="@drawable/ic_action_up" />
 
+    <ScrollView
+        android:id="@+id/content_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/avatar_image_view"
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:importantForAccessibility="no"
+                tools:src="@tools:sample/avatars" />
+
+            <TextView
+                android:id="@+id/name_text_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="16dp"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textAppearance="?textAppearanceHeadline5"
+                tools:text="Rick Sanchez" />
+
+            <TextView
+                android:id="@+id/description_text_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:textAppearance="?textAppearanceBody1"
+                android:textColor="?android:textColorPrimary"
+                tools:text="Alive · Human · Male" />
+
+            <me.alexpetrakov.morty.common.presentation.TwoLineTileView
+                android:id="@+id/origin_tile"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="16dp"
+                app:tltv_title="@string/app_origin"
+                tools:tltv_body="Earth (C-137)" />
+
+            <me.alexpetrakov.morty.common.presentation.TwoLineTileView
+                android:id="@+id/last_known_location_tile"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:tltv_title="@string/app_last_known_location"
+                tools:tltv_body="Citadel of Ricks" />
+
+            <me.alexpetrakov.morty.common.presentation.TwoLineTileView
+                android:id="@+id/first_seen_in_tile"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:tltv_title="@string/app_first_seen_in"
+                tools:tltv_body="S01E01 Pilot" />
+
+            <me.alexpetrakov.morty.common.presentation.TwoLineTileView
+                android:id="@+id/seen_in_tile"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:tltv_title="@string/app_seen_in"
+                tools:tltv_body="51 episodes" />
+        </LinearLayout>
+    </ScrollView>
+
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminate="true"
+        android:visibility="gone"
+        app:minHideDelay="300"
+        app:showDelay="50"
+        tools:visibility="visible" />
+
+    <include
+        android:id="@+id/error_layout"
+        layout="@layout/layout_error_view"
+        android:visibility="gone"
+        tools:visibility="visible" />
 </LinearLayout>
