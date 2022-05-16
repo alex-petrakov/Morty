@@ -1,8 +1,8 @@
 package me.alexpetrakov.morty.characterdetails.presentation
 
 import me.alexpetrakov.morty.R
-import me.alexpetrakov.morty.common.domain.CharacterDetails
-import me.alexpetrakov.morty.common.domain.ResourceProvider
+import me.alexpetrakov.morty.common.domain.model.CharacterDetails
+import me.alexpetrakov.morty.common.domain.repositories.ResourceProvider
 import me.alexpetrakov.morty.common.presentation.mappers.toUiModel
 
 sealed class ViewState {

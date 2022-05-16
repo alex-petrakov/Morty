@@ -1,8 +1,8 @@
 package me.alexpetrakov.morty.common.data.db
 
 import androidx.room.TypeConverter
-import me.alexpetrakov.morty.common.domain.Gender
-import me.alexpetrakov.morty.common.domain.VitalStatus
+import me.alexpetrakov.morty.common.domain.model.Gender
+import me.alexpetrakov.morty.common.domain.model.VitalStatus
 import java.time.Instant
 
 class Converters {

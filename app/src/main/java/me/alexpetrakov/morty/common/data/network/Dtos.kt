@@ -5,8 +5,8 @@ import com.squareup.moshi.JsonClass
 import me.alexpetrakov.morty.common.data.db.character.CharacterEntity
 import me.alexpetrakov.morty.common.data.db.characterdetails.CharacterDetailsEntity
 import me.alexpetrakov.morty.common.data.db.characterdetails.EpisodeEntity
-import me.alexpetrakov.morty.common.domain.Gender
-import me.alexpetrakov.morty.common.domain.VitalStatus
+import me.alexpetrakov.morty.common.domain.model.Gender
+import me.alexpetrakov.morty.common.domain.model.VitalStatus
 import java.time.Instant
 
 @JsonClass(generateAdapter = true)

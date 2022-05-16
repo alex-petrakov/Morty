@@ -15,8 +15,8 @@ import me.alexpetrakov.morty.common.data.AndroidResourceProvider
 import me.alexpetrakov.morty.common.data.CharactersProvider
 import me.alexpetrakov.morty.common.data.db.CharacterDatabase
 import me.alexpetrakov.morty.common.data.network.RickAndMortyApi
-import me.alexpetrakov.morty.common.domain.CharactersRepository
-import me.alexpetrakov.morty.common.domain.ResourceProvider
+import me.alexpetrakov.morty.common.domain.repositories.CharactersRepository
+import me.alexpetrakov.morty.common.domain.repositories.ResourceProvider
 import retrofit2.Retrofit
 import javax.inject.Singleton
 

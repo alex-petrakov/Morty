@@ -8,8 +8,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
-import me.alexpetrakov.morty.common.domain.CharactersRepository
-import me.alexpetrakov.morty.common.domain.ResourceProvider
+import me.alexpetrakov.morty.common.domain.repositories.CharactersRepository
+import me.alexpetrakov.morty.common.domain.repositories.ResourceProvider
 import javax.inject.Inject
 
 @HiltViewModel

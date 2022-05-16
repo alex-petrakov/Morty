@@ -2,7 +2,7 @@ package me.alexpetrakov.morty.common.data
 
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
-import me.alexpetrakov.morty.common.domain.ResourceProvider
+import me.alexpetrakov.morty.common.domain.repositories.ResourceProvider
 import javax.inject.Inject
 import javax.inject.Singleton
 

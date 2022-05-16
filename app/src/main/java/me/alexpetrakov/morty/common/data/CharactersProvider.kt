@@ -10,9 +10,9 @@ import me.alexpetrakov.morty.common.data.db.characterdetails.CharacterDetailsEnt
 import me.alexpetrakov.morty.common.data.db.characterdetails.toDomainModel
 import me.alexpetrakov.morty.common.data.network.RickAndMortyApi
 import me.alexpetrakov.morty.common.data.network.toEntity
-import me.alexpetrakov.morty.common.domain.Character
-import me.alexpetrakov.morty.common.domain.CharacterDetails
-import me.alexpetrakov.morty.common.domain.CharactersRepository
+import me.alexpetrakov.morty.common.domain.model.Character
+import me.alexpetrakov.morty.common.domain.model.CharacterDetails
+import me.alexpetrakov.morty.common.domain.repositories.CharactersRepository
 import retrofit2.HttpException
 import java.io.IOException
 import java.time.Duration

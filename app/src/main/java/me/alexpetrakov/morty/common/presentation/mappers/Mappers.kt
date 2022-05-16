@@ -1,9 +1,9 @@
 package me.alexpetrakov.morty.common.presentation.mappers
 
 import me.alexpetrakov.morty.R
-import me.alexpetrakov.morty.common.domain.Gender
-import me.alexpetrakov.morty.common.domain.ResourceProvider
-import me.alexpetrakov.morty.common.domain.VitalStatus
+import me.alexpetrakov.morty.common.domain.model.Gender
+import me.alexpetrakov.morty.common.domain.model.VitalStatus
+import me.alexpetrakov.morty.common.domain.repositories.ResourceProvider
 
 fun VitalStatus.toUiModel(resourceProvider: ResourceProvider): String {
     val id = when (this) {

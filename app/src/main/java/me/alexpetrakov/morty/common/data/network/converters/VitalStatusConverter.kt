@@ -2,7 +2,7 @@ package me.alexpetrakov.morty.common.data.network.converters
 
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.ToJson
-import me.alexpetrakov.morty.common.domain.VitalStatus
+import me.alexpetrakov.morty.common.domain.model.VitalStatus
 
 class VitalStatusConverter {
 

@@ -4,10 +4,10 @@ import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import me.alexpetrakov.morty.common.domain.CharacterDetails
-import me.alexpetrakov.morty.common.domain.Episode
-import me.alexpetrakov.morty.common.domain.Gender
-import me.alexpetrakov.morty.common.domain.VitalStatus
+import me.alexpetrakov.morty.common.domain.model.CharacterDetails
+import me.alexpetrakov.morty.common.domain.model.Episode
+import me.alexpetrakov.morty.common.domain.model.Gender
+import me.alexpetrakov.morty.common.domain.model.VitalStatus
 import java.time.Instant
 
 @Entity(tableName = "character_details")

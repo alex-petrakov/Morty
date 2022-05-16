@@ -6,9 +6,9 @@ import androidx.room.ForeignKey
 import androidx.room.ForeignKey.CASCADE
 import androidx.room.PrimaryKey
 import me.alexpetrakov.morty.common.data.db.page.PageEntity
-import me.alexpetrakov.morty.common.domain.Character
-import me.alexpetrakov.morty.common.domain.Gender
-import me.alexpetrakov.morty.common.domain.VitalStatus
+import me.alexpetrakov.morty.common.domain.model.Character
+import me.alexpetrakov.morty.common.domain.model.Gender
+import me.alexpetrakov.morty.common.domain.model.VitalStatus
 
 @Entity(
     tableName = "characters",
