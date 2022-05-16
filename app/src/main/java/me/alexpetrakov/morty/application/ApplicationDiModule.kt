@@ -1,5 +1,8 @@
 package me.alexpetrakov.morty.application
 
+import com.github.terrakok.cicerone.Cicerone
+import com.github.terrakok.cicerone.NavigatorHolder
+import com.github.terrakok.cicerone.Router
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
@@ -32,5 +35,19 @@ object ApplicationDiModule {
             .baseUrl(BuildConfig.API_BASE_URL)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideCicerone(): Cicerone<Router> = Cicerone.create()
+
+    @Provides
+    @Singleton
+    fun providerRouter(cicerone: Cicerone<Router>): Router = cicerone.router
+
+    @Provides
+    @Singleton
+    fun provideNavigatorHolder(cicerone: Cicerone<Router>): NavigatorHolder {
+        return cicerone.getNavigatorHolder()
     }
 }
