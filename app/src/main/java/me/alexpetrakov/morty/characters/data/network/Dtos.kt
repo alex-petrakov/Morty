@@ -2,8 +2,12 @@ package me.alexpetrakov.morty.characters.data.network
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import me.alexpetrakov.morty.characters.data.db.CharacterDetailsEntity
+import me.alexpetrakov.morty.characters.data.db.CharacterEntity
+import me.alexpetrakov.morty.characters.data.db.EpisodeEntity
 import me.alexpetrakov.morty.characters.domain.Gender
 import me.alexpetrakov.morty.characters.domain.VitalStatus
+import java.time.Instant
 
 @JsonClass(generateAdapter = true)
 data class CharacterPageJson(
@@ -27,6 +31,10 @@ data class CharacterJson(
     @Json(name = "image") val imageUrl: String
 )
 
+fun CharacterJson.toEntity(pageUrl: String): CharacterEntity {
+    return CharacterEntity(id, pageUrl, name, species, gender, vitalStatus, imageUrl)
+}
+
 @JsonClass(generateAdapter = true)
 data class CharacterDetailsJson(
     @Json(name = "id") val id: Int,
@@ -40,6 +48,25 @@ data class CharacterDetailsJson(
     @Json(name = "episode") val episodeUrls: List<String>
 )
 
+fun CharacterDetailsJson.toEntity(
+    episodeJson: EpisodeJson,
+    lastUpdateInstant: Instant
+): CharacterDetailsEntity {
+    return CharacterDetailsEntity(
+        id,
+        name,
+        species,
+        gender,
+        vitalStatus,
+        originLocation.name,
+        lastKnownLocation.name,
+        episodeJson.toEntity(),
+        episodeUrls.size,
+        imageUrl,
+        lastUpdateInstant
+    )
+}
+
 @JsonClass(generateAdapter = true)
 data class LocationJson(
     @Json(name = "name") val name: String,
@@ -52,3 +79,7 @@ data class EpisodeJson(
     @Json(name = "name") val name: String,
     @Json(name = "episode") val codeName: String
 )
+
+fun EpisodeJson.toEntity(): EpisodeEntity {
+    return EpisodeEntity(id, name, codeName)
+}

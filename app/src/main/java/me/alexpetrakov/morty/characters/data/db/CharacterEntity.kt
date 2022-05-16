@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.ForeignKey.CASCADE
 import androidx.room.PrimaryKey
+import me.alexpetrakov.morty.characters.domain.Character
 import me.alexpetrakov.morty.characters.domain.Gender
 import me.alexpetrakov.morty.characters.domain.VitalStatus
 
@@ -29,3 +30,7 @@ data class CharacterEntity(
     @ColumnInfo(name = "vital_status") val vitalStatus: VitalStatus,
     @ColumnInfo(name = "image_url") val imageUrl: String
 )
+
+fun CharacterEntity.toDomainModel(): Character {
+    return Character(id, name, species, gender, vitalStatus, imageUrl)
+}

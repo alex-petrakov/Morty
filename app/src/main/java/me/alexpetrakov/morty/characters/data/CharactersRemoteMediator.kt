@@ -5,14 +5,12 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import me.alexpetrakov.morty.characters.data.db.CharacterDatabase
 import me.alexpetrakov.morty.characters.data.db.CharacterEntity
 import me.alexpetrakov.morty.characters.data.db.PageEntity
-import me.alexpetrakov.morty.characters.data.network.CharacterJson
 import me.alexpetrakov.morty.characters.data.network.CharacterPageJson
 import me.alexpetrakov.morty.characters.data.network.RickAndMortyApi
+import me.alexpetrakov.morty.characters.data.network.toEntity
 import retrofit2.HttpException
 import java.io.IOException
 import java.time.Duration
@@ -113,7 +111,7 @@ class CharactersRemoteMediator(
             pageDao.insert(
                 PageEntity(pageUrl, response.nextPageUrl, response.prevPageUrl, Instant.now())
             )
-            characterDao.insertAll(response.characters.toEntities(pageUrl))
+            characterDao.insertAll(response.characters.map { it.toEntity(pageUrl) })
         }
     }
 
@@ -132,13 +130,3 @@ private val CharacterPageJson.hasMorePages get() = pageInfo.nextUrl != null
 private val CharacterPageJson.nextPageUrl get() = pageInfo.nextUrl
 
 private val CharacterPageJson.prevPageUrl get() = pageInfo.previousUrl
-
-private suspend fun List<CharacterJson>.toEntities(pageUrl: String): List<CharacterEntity> {
-    return withContext(Dispatchers.Default) {
-        map { it.toEntity(pageUrl) }
-    }
-}
-
-private fun CharacterJson.toEntity(pageUrl: String): CharacterEntity {
-    return CharacterEntity(id, pageUrl, name, species, gender, vitalStatus, imageUrl)
-}

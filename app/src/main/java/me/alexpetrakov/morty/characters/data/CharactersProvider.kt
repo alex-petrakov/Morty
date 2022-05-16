@@ -5,15 +5,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import me.alexpetrakov.morty.characters.data.db.CharacterDatabase
 import me.alexpetrakov.morty.characters.data.db.CharacterDetailsEntity
-import me.alexpetrakov.morty.characters.data.db.CharacterEntity
-import me.alexpetrakov.morty.characters.data.db.EpisodeEntity
-import me.alexpetrakov.morty.characters.data.network.CharacterDetailsJson
-import me.alexpetrakov.morty.characters.data.network.EpisodeJson
+import me.alexpetrakov.morty.characters.data.db.toDomainModel
 import me.alexpetrakov.morty.characters.data.network.RickAndMortyApi
+import me.alexpetrakov.morty.characters.data.network.toEntity
 import me.alexpetrakov.morty.characters.domain.Character
 import me.alexpetrakov.morty.characters.domain.CharacterDetails
 import me.alexpetrakov.morty.characters.domain.CharactersRepository
-import me.alexpetrakov.morty.characters.domain.Episode
 import retrofit2.HttpException
 import java.io.IOException
 import java.time.Duration
@@ -31,7 +28,7 @@ class CharactersProvider @Inject constructor(
 
     @OptIn(ExperimentalPagingApi::class)
     override fun getCharacters(): Flow<PagingData<Character>> {
-        return Pager(
+        val flowOfPagingData = Pager(
             config = PagingConfig(
                 pageSize = DEFAULT_PAGE_SIZE,
                 enablePlaceholders = true,
@@ -39,11 +36,10 @@ class CharactersProvider @Inject constructor(
             ),
             remoteMediator = CharactersRemoteMediator(api, db, MAX_CACHE_LIFETIME),
             pagingSourceFactory = { db.characterDao().getAll() }
-        ).flow.map { data -> data.map { it.toDomainModel() } }
-    }
-
-    private fun CharacterEntity.toDomainModel(): Character {
-        return Character(id, name, species, gender, vitalStatus, imageUrl)
+        ).flow
+        return flowOfPagingData.map { pagingData ->
+            pagingData.map { it.toDomainModel() }
+        }
     }
 
     override suspend fun getCharacter(id: Int): CharacterDetails? {
@@ -86,46 +82,4 @@ class CharactersProvider @Inject constructor(
 
         private val MAX_CACHE_LIFETIME = Duration.ofHours(1)
     }
-}
-
-private fun CharacterDetailsJson.toEntity(
-    episodeJson: EpisodeJson,
-    lastUpdateInstant: Instant
-): CharacterDetailsEntity {
-    return CharacterDetailsEntity(
-        id,
-        name,
-        species,
-        gender,
-        vitalStatus,
-        originLocation.name,
-        lastKnownLocation.name,
-        episodeJson.toEntity(),
-        episodeUrls.size,
-        imageUrl,
-        lastUpdateInstant
-    )
-}
-
-private fun EpisodeJson.toEntity(): EpisodeEntity {
-    return EpisodeEntity(id, name, codeName)
-}
-
-private fun CharacterDetailsEntity.toDomainModel(): CharacterDetails {
-    return CharacterDetails(
-        id,
-        name,
-        species,
-        gender,
-        vitalStatus,
-        originLocation,
-        lastKnownLocation,
-        firstEpisode.toDomainModel(),
-        episodeCount,
-        imageUrl
-    )
-}
-
-private fun EpisodeEntity.toDomainModel(): Episode {
-    return Episode(id, name, codeName)
 }
