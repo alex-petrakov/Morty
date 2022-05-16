@@ -24,7 +24,7 @@ import me.alexpetrakov.morty.common.domain.model.VitalStatus
 )
 data class CharacterEntity(
     @PrimaryKey @ColumnInfo(name = "id") val id: Int,
-    @ColumnInfo(name = "page_url") val pageUrl: String,
+    @ColumnInfo(name = "page_url", index = true) val pageUrl: String,
     @ColumnInfo(name = "name") val name: String,
     @ColumnInfo(name = "species") val species: String,
     @ColumnInfo(name = "gender") val gender: Gender,
