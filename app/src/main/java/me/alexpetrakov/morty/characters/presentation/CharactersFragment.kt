@@ -12,6 +12,7 @@ import androidx.paging.PagingData
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.elevation.ElevationOverlayProvider
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.transition.MaterialSharedAxis
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.*
 import me.alexpetrakov.morty.R
@@ -32,6 +33,14 @@ class CharactersFragment : Fragment() {
         this,
         onCharacterClick = { character -> viewModel.onCharacterClicked(character) }
     )
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        exitTransition = MaterialSharedAxis(MaterialSharedAxis.Z, true)
+            .excludeTarget(R.id.toolbar, true)
+        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Z, false)
+            .excludeTarget(R.id.toolbar, true)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

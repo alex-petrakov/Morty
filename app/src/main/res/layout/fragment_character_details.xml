@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/root"
     android:orientation="vertical">
 
     <com.google.android.material.appbar.MaterialToolbar
@@ -15,6 +16,7 @@
         app:navigationIcon="@drawable/ic_action_up" />
 
     <FrameLayout
+        android:transitionGroup="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 

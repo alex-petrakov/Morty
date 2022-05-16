@@ -12,9 +12,11 @@ import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
+import com.google.android.material.transition.MaterialSharedAxis
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import me.alexpetrakov.morty.R
 import me.alexpetrakov.morty.common.presentation.extensions.viewLifecycle
 import me.alexpetrakov.morty.databinding.FragmentCharacterDetailsBinding
 
@@ -26,6 +28,14 @@ class CharacterDetailsFragment : Fragment() {
     private var _binding: FragmentCharacterDetailsBinding? = null
 
     private val binding get() = _binding!!
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enterTransition = MaterialSharedAxis(MaterialSharedAxis.Z, true)
+            .excludeTarget(R.id.toolbar, true)
+        returnTransition = MaterialSharedAxis(MaterialSharedAxis.Z, false)
+            .excludeTarget(R.id.toolbar, true)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
