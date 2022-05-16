@@ -2,8 +2,8 @@ package me.alexpetrakov.morty
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.github.terrakok.cicerone.Forward
 import com.github.terrakok.cicerone.NavigatorHolder
+import com.github.terrakok.cicerone.Replace
 import com.github.terrakok.cicerone.androidx.AppNavigator
 import dagger.hilt.android.AndroidEntryPoint
 import me.alexpetrakov.morty.databinding.ActivityHostBinding
@@ -23,7 +23,7 @@ class HostActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         if (supportFragmentManager.findFragmentById(R.id.fragment_container) == null) {
-            navigator.applyCommands(arrayOf(Forward(AppScreens.characters())))
+            navigator.applyCommands(arrayOf(Replace(AppScreens.characters())))
         }
     }
 
