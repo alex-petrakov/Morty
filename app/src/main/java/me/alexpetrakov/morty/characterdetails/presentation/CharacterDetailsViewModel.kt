@@ -74,8 +74,8 @@ private fun CharacterDetails.toUiModel(resourceProvider: ResourceProvider): Char
         id,
         name,
         "$vitalStatus · $species · $gender",
-        origin,
-        lastKnownLocation,
+        origin.replaceFirstChar { it.titlecase() },
+        lastKnownLocation.replaceFirstChar { it.titlecase() },
         "${firstEpisode.codeName} ${firstEpisode.name}",
         episodeCount,
         imageUrl
