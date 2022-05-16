@@ -4,9 +4,20 @@ import androidx.paging.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import me.alexpetrakov.morty.characters.data.db.CharacterDatabase
+import me.alexpetrakov.morty.characters.data.db.CharacterDetailsEntity
 import me.alexpetrakov.morty.characters.data.db.CharacterEntity
+import me.alexpetrakov.morty.characters.data.db.EpisodeEntity
+import me.alexpetrakov.morty.characters.data.network.CharacterDetailsJson
+import me.alexpetrakov.morty.characters.data.network.EpisodeJson
 import me.alexpetrakov.morty.characters.data.network.RickAndMortyApi
-import me.alexpetrakov.morty.characters.domain.*
+import me.alexpetrakov.morty.characters.domain.Character
+import me.alexpetrakov.morty.characters.domain.CharacterDetails
+import me.alexpetrakov.morty.characters.domain.CharactersRepository
+import me.alexpetrakov.morty.characters.domain.Episode
+import retrofit2.HttpException
+import java.io.IOException
+import java.time.Duration
+import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -16,6 +27,8 @@ class CharactersProvider @Inject constructor(
     private val db: CharacterDatabase
 ) : CharactersRepository {
 
+    private val characterDetailsDao = db.characterDetailsDao()
+
     @OptIn(ExperimentalPagingApi::class)
     override fun getCharacters(): Flow<PagingData<Character>> {
         return Pager(
@@ -24,7 +37,7 @@ class CharactersProvider @Inject constructor(
                 enablePlaceholders = true,
                 initialLoadSize = PRELOADED_PAGE_COUNT * DEFAULT_PAGE_SIZE
             ),
-            remoteMediator = CharactersRemoteMediator(api, db),
+            remoteMediator = CharactersRemoteMediator(api, db, MAX_CACHE_LIFETIME),
             pagingSourceFactory = { db.characterDao().getAll() }
         ).flow.map { data -> data.map { it.toDomainModel() } }
     }
@@ -34,22 +47,85 @@ class CharactersProvider @Inject constructor(
     }
 
     override suspend fun getCharacter(id: Int): CharacterDetails? {
-        return CharacterDetails(
-            1,
-            "Rick Sanchez",
-            "Human",
-            Gender.MALE,
-            VitalStatus.ALIVE,
-            "Earth",
-            "Citadel of Ricks",
-            Episode(1, "Pilot", "S01E01"),
-            51,
-            "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
-        )
+        val entity = getCachedCharacter(id) ?: loadCharacterFromApi(id)?.also {
+            characterDetailsDao.insert(it)
+        }
+        return entity?.toDomainModel()
     }
+
+    private suspend fun getCachedCharacter(id: Int): CharacterDetailsEntity? {
+        val cachedEntity = characterDetailsDao.getById(id) ?: return null
+        return if (cachedEntity.isStale) {
+            null
+        } else {
+            cachedEntity
+        }
+    }
+
+    private suspend fun loadCharacterFromApi(id: Int): CharacterDetailsEntity? {
+        return try {
+            val detailsJson = api.getCharacterDetails(id)
+            val episodeJson = api.getEpisode(detailsJson.episodeUrls[0])
+            detailsJson.toEntity(episodeJson, lastUpdateInstant = Instant.now())
+        } catch (e: IOException) {
+            null
+        } catch (e: HttpException) {
+            null
+        }
+    }
+
+    private val CharacterDetailsEntity.isStale: Boolean
+        get() {
+            val lifetime = Duration.between(lastUpdateInstant, Instant.now())
+            return lifetime.isNegative || lifetime > MAX_CACHE_LIFETIME
+        }
 
     companion object {
         private const val DEFAULT_PAGE_SIZE = 20
         private const val PRELOADED_PAGE_COUNT = 3
+
+        private val MAX_CACHE_LIFETIME = Duration.ofHours(1)
     }
+}
+
+private fun CharacterDetailsJson.toEntity(
+    episodeJson: EpisodeJson,
+    lastUpdateInstant: Instant
+): CharacterDetailsEntity {
+    return CharacterDetailsEntity(
+        id,
+        name,
+        species,
+        gender,
+        vitalStatus,
+        originLocation.name,
+        lastKnownLocation.name,
+        episodeJson.toEntity(),
+        episodeUrls.size,
+        imageUrl,
+        lastUpdateInstant
+    )
+}
+
+private fun EpisodeJson.toEntity(): EpisodeEntity {
+    return EpisodeEntity(id, name, codeName)
+}
+
+private fun CharacterDetailsEntity.toDomainModel(): CharacterDetails {
+    return CharacterDetails(
+        id,
+        name,
+        species,
+        gender,
+        vitalStatus,
+        originLocation,
+        lastKnownLocation,
+        firstEpisode.toDomainModel(),
+        episodeCount,
+        imageUrl
+    )
+}
+
+private fun EpisodeEntity.toDomainModel(): Episode {
+    return Episode(id, name, codeName)
 }

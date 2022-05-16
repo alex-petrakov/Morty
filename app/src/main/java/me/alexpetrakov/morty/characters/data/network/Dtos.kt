@@ -26,3 +26,29 @@ data class CharacterJson(
     @Json(name = "status") val vitalStatus: VitalStatus,
     @Json(name = "image") val imageUrl: String
 )
+
+@JsonClass(generateAdapter = true)
+data class CharacterDetailsJson(
+    @Json(name = "id") val id: Int,
+    @Json(name = "name") val name: String,
+    @Json(name = "species") val species: String,
+    @Json(name = "gender") val gender: Gender,
+    @Json(name = "status") val vitalStatus: VitalStatus,
+    @Json(name = "origin") val originLocation: LocationJson,
+    @Json(name = "location") val lastKnownLocation: LocationJson,
+    @Json(name = "image") val imageUrl: String,
+    @Json(name = "episode") val episodeUrls: List<String>
+)
+
+@JsonClass(generateAdapter = true)
+data class LocationJson(
+    @Json(name = "name") val name: String,
+    @Json(name = "url") val url: String,
+)
+
+@JsonClass(generateAdapter = true)
+data class EpisodeJson(
+    @Json(name = "id") val id: Int,
+    @Json(name = "name") val name: String,
+    @Json(name = "episode") val codeName: String
+)

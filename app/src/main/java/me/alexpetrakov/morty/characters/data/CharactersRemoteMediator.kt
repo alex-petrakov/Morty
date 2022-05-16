@@ -21,7 +21,8 @@ import java.time.Instant
 @OptIn(ExperimentalPagingApi::class)
 class CharactersRemoteMediator(
     private val api: RickAndMortyApi,
-    private val db: CharacterDatabase
+    private val db: CharacterDatabase,
+    private val maxCacheLifetime: Duration
 ) : RemoteMediator<Int, CharacterEntity>() {
 
     private val characterDao = db.characterDao()
@@ -32,7 +33,7 @@ class CharactersRemoteMediator(
         val now = Instant.now()
         val updatedAt = pageDao.lastUpdateInstant() ?: Instant.MIN
         val actualCacheLifetime = Duration.between(updatedAt, now)
-        return if (actualCacheLifetime.isNegative || actualCacheLifetime > MAX_CACHE_LIFETIME) {
+        return if (actualCacheLifetime.isNegative || actualCacheLifetime > maxCacheLifetime) {
             InitializeAction.LAUNCH_INITIAL_REFRESH
         } else {
             InitializeAction.SKIP_INITIAL_REFRESH
@@ -120,10 +121,6 @@ class CharactersRemoteMediator(
         object Finish : Action()
         object SkipPage : Action()
         data class LoadPage(val pageUrl: String) : Action()
-    }
-
-    companion object {
-        private val MAX_CACHE_LIFETIME = Duration.ofHours(1)
     }
 }
 
