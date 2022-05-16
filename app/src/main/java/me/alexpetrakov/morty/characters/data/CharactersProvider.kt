@@ -1,6 +1,7 @@
 package me.alexpetrakov.morty.characters.data
 
 import androidx.paging.*
+import com.squareup.moshi.JsonDataException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import me.alexpetrakov.morty.characters.data.db.CharacterDatabase
@@ -63,10 +64,11 @@ class CharactersProvider @Inject constructor(
             val detailsJson = api.getCharacterDetails(id)
             val episodeJson = api.getEpisode(detailsJson.episodeUrls[0])
             detailsJson.toEntity(episodeJson, lastUpdateInstant = Instant.now())
-        } catch (e: IOException) {
-            null
-        } catch (e: HttpException) {
-            null
+        } catch (e: Exception) {
+            when (e) {
+                is IOException, is HttpException, is JsonDataException -> null
+                else -> throw e
+            }
         }
     }
 

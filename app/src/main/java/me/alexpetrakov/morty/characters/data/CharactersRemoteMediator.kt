@@ -5,6 +5,7 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
+import com.squareup.moshi.JsonDataException
 import me.alexpetrakov.morty.characters.data.db.CharacterDatabase
 import me.alexpetrakov.morty.characters.data.db.CharacterEntity
 import me.alexpetrakov.morty.characters.data.db.PageEntity
@@ -50,10 +51,13 @@ class CharactersRemoteMediator(
 
         val response = try {
             api.getCharacterPage(pageUrl)
-        } catch (e: IOException) {
-            return MediatorResult.Error(e)
-        } catch (e: HttpException) {
-            return MediatorResult.Error(e)
+        } catch (e: Exception) {
+            when (e) {
+                is IOException, is HttpException, is JsonDataException -> {
+                    return MediatorResult.Error(e)
+                }
+                else -> throw e
+            }
         }
 
         cacheResponse(response, pageUrl, invalidateCache = loadType == LoadType.REFRESH)
