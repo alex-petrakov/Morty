@@ -7,8 +7,8 @@ import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import com.squareup.moshi.JsonDataException
 import me.alexpetrakov.morty.characters.data.db.CharacterDatabase
-import me.alexpetrakov.morty.characters.data.db.CharacterEntity
-import me.alexpetrakov.morty.characters.data.db.PageEntity
+import me.alexpetrakov.morty.characters.data.db.character.CharacterEntity
+import me.alexpetrakov.morty.characters.data.db.page.PageEntity
 import me.alexpetrakov.morty.characters.data.network.CharacterPageJson
 import me.alexpetrakov.morty.characters.data.network.RickAndMortyApi
 import me.alexpetrakov.morty.characters.data.network.toEntity

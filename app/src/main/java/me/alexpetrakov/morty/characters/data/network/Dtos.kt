@@ -2,9 +2,9 @@ package me.alexpetrakov.morty.characters.data.network
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import me.alexpetrakov.morty.characters.data.db.CharacterDetailsEntity
-import me.alexpetrakov.morty.characters.data.db.CharacterEntity
-import me.alexpetrakov.morty.characters.data.db.EpisodeEntity
+import me.alexpetrakov.morty.characters.data.db.character.CharacterEntity
+import me.alexpetrakov.morty.characters.data.db.characterdetails.CharacterDetailsEntity
+import me.alexpetrakov.morty.characters.data.db.characterdetails.EpisodeEntity
 import me.alexpetrakov.morty.characters.domain.Gender
 import me.alexpetrakov.morty.characters.domain.VitalStatus
 import java.time.Instant

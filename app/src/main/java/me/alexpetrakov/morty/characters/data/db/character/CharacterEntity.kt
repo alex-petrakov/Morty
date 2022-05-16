@@ -1,10 +1,11 @@
-package me.alexpetrakov.morty.characters.data.db
+package me.alexpetrakov.morty.characters.data.db.character
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.ForeignKey.CASCADE
 import androidx.room.PrimaryKey
+import me.alexpetrakov.morty.characters.data.db.page.PageEntity
 import me.alexpetrakov.morty.characters.domain.Character
 import me.alexpetrakov.morty.characters.domain.Gender
 import me.alexpetrakov.morty.characters.domain.VitalStatus

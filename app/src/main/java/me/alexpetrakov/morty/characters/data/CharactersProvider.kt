@@ -5,8 +5,9 @@ import com.squareup.moshi.JsonDataException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import me.alexpetrakov.morty.characters.data.db.CharacterDatabase
-import me.alexpetrakov.morty.characters.data.db.CharacterDetailsEntity
-import me.alexpetrakov.morty.characters.data.db.toDomainModel
+import me.alexpetrakov.morty.characters.data.db.character.toDomainModel
+import me.alexpetrakov.morty.characters.data.db.characterdetails.CharacterDetailsEntity
+import me.alexpetrakov.morty.characters.data.db.characterdetails.toDomainModel
 import me.alexpetrakov.morty.characters.data.network.RickAndMortyApi
 import me.alexpetrakov.morty.characters.data.network.toEntity
 import me.alexpetrakov.morty.characters.domain.Character

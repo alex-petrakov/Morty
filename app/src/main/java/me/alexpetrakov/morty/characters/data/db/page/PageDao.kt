@@ -1,4 +1,4 @@
-package me.alexpetrakov.morty.characters.data.db
+package me.alexpetrakov.morty.characters.data.db.page
 
 import androidx.room.Dao
 import androidx.room.Insert

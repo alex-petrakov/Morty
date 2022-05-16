@@ -1,4 +1,4 @@
-package me.alexpetrakov.morty.characters.data.db
+package me.alexpetrakov.morty.characters.data.db.characterdetails
 
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
