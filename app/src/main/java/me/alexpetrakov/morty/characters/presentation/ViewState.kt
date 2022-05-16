@@ -3,7 +3,12 @@ package me.alexpetrakov.morty.characters.presentation
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.paging.LoadState.*
+import androidx.paging.PagingData
+import androidx.paging.map
 import androidx.recyclerview.widget.DiffUtil
+import me.alexpetrakov.morty.characters.domain.Character
+import me.alexpetrakov.morty.common.domain.ResourceProvider
+import me.alexpetrakov.morty.common.presentation.mappers.toUiModel
 
 enum class CompoundPagingState {
     LOADING, ERROR, REMOTE_ERROR, CONTENT;
@@ -82,4 +87,17 @@ data class CharacterUiModel(
             return old == new
         }
     }
+}
+
+fun PagingData<Character>.toPagingDataOfUiModels(
+    resourceProvider: ResourceProvider
+): PagingData<CharacterUiModel> {
+    return map { it.toUiModel(resourceProvider) }
+}
+
+fun Character.toUiModel(resourceProvider: ResourceProvider): CharacterUiModel {
+    val species = species.replaceFirstChar { it.titlecase() }
+    val vitalStatus = vitalStatus.toUiModel(resourceProvider)
+    val gender = gender.toUiModel(resourceProvider)
+    return CharacterUiModel(id, name, "$vitalStatus · $species · $gender", imageUrl)
 }

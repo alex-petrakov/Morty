@@ -8,11 +8,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
-import me.alexpetrakov.morty.R
-import me.alexpetrakov.morty.characters.domain.CharacterDetails
 import me.alexpetrakov.morty.characters.domain.CharactersRepository
 import me.alexpetrakov.morty.common.domain.ResourceProvider
-import me.alexpetrakov.morty.common.presentation.mappers.toUiModel
 import javax.inject.Inject
 
 @HiltViewModel
@@ -52,32 +49,4 @@ class CharacterDetailsViewModel @Inject constructor(
     companion object {
         const val ARG_CHARACTER_ID = "CHARACTER_ID"
     }
-}
-
-private fun CharacterDetails?.toViewState(resourceProvider: ResourceProvider): ViewState {
-    return when (this) {
-        null -> ViewState.Error
-        else -> ViewState.Content(toUiModel(resourceProvider))
-    }
-}
-
-private fun CharacterDetails.toUiModel(resourceProvider: ResourceProvider): CharacterDetailsUiModel {
-    val species = species.replaceFirstChar { it.titlecase() }
-    val vitalStatus = vitalStatus.toUiModel(resourceProvider)
-    val gender = gender.toUiModel(resourceProvider)
-    val episodeCount = resourceProvider.getQuantityString(
-        R.plurals.app_formattable_episode_count,
-        episodeCount,
-        episodeCount
-    )
-    return CharacterDetailsUiModel(
-        id,
-        name,
-        "$vitalStatus · $species · $gender",
-        origin.replaceFirstChar { it.titlecase() },
-        lastKnownLocation.replaceFirstChar { it.titlecase() },
-        "${firstEpisode.codeName} ${firstEpisode.name}",
-        episodeCount,
-        imageUrl
-    )
 }
