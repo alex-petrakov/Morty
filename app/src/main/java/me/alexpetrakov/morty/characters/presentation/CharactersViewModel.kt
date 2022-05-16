@@ -7,7 +7,7 @@ import com.github.terrakok.cicerone.Router
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.map
 import me.alexpetrakov.morty.AppScreens
-import me.alexpetrakov.morty.characters.domain.CharactersRepository
+import me.alexpetrakov.morty.common.domain.CharactersRepository
 import me.alexpetrakov.morty.common.domain.ResourceProvider
 import javax.inject.Inject
 

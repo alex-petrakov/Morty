@@ -1,7 +1,7 @@
 package me.alexpetrakov.morty.characterdetails.presentation
 
 import me.alexpetrakov.morty.R
-import me.alexpetrakov.morty.characters.domain.CharacterDetails
+import me.alexpetrakov.morty.common.domain.CharacterDetails
 import me.alexpetrakov.morty.common.domain.ResourceProvider
 import me.alexpetrakov.morty.common.presentation.mappers.toUiModel
 

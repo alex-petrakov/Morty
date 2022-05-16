@@ -1,4 +1,4 @@
-package me.alexpetrakov.morty.characters.domain
+package me.alexpetrakov.morty.common.domain
 
 data class Character(
     val id: Int,

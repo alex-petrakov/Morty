@@ -1,4 +1,4 @@
-package me.alexpetrakov.morty.characters.domain
+package me.alexpetrakov.morty.common.domain
 
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow

@@ -1,13 +1,13 @@
-package me.alexpetrakov.morty.characters.data.db.characterdetails
+package me.alexpetrakov.morty.common.data.db.characterdetails
 
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import me.alexpetrakov.morty.characters.domain.CharacterDetails
-import me.alexpetrakov.morty.characters.domain.Episode
-import me.alexpetrakov.morty.characters.domain.Gender
-import me.alexpetrakov.morty.characters.domain.VitalStatus
+import me.alexpetrakov.morty.common.domain.CharacterDetails
+import me.alexpetrakov.morty.common.domain.Episode
+import me.alexpetrakov.morty.common.domain.Gender
+import me.alexpetrakov.morty.common.domain.VitalStatus
 import java.time.Instant
 
 @Entity(tableName = "character_details")

@@ -1,4 +1,4 @@
-package me.alexpetrakov.morty.characters.data.db.character
+package me.alexpetrakov.morty.common.data.db.character
 
 import androidx.paging.PagingSource
 import androidx.room.Dao

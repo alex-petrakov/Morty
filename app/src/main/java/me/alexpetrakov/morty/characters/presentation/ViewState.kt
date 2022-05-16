@@ -6,7 +6,7 @@ import androidx.paging.LoadState.*
 import androidx.paging.PagingData
 import androidx.paging.map
 import androidx.recyclerview.widget.DiffUtil
-import me.alexpetrakov.morty.characters.domain.Character
+import me.alexpetrakov.morty.common.domain.Character
 import me.alexpetrakov.morty.common.domain.ResourceProvider
 import me.alexpetrakov.morty.common.presentation.mappers.toUiModel
 

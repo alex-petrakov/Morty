@@ -1,4 +1,4 @@
-package me.alexpetrakov.morty.characters.data
+package me.alexpetrakov.morty.common.data
 
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
@@ -6,12 +6,12 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import com.squareup.moshi.JsonDataException
-import me.alexpetrakov.morty.characters.data.db.CharacterDatabase
-import me.alexpetrakov.morty.characters.data.db.character.CharacterEntity
-import me.alexpetrakov.morty.characters.data.db.page.PageEntity
-import me.alexpetrakov.morty.characters.data.network.CharacterPageJson
-import me.alexpetrakov.morty.characters.data.network.RickAndMortyApi
-import me.alexpetrakov.morty.characters.data.network.toEntity
+import me.alexpetrakov.morty.common.data.db.CharacterDatabase
+import me.alexpetrakov.morty.common.data.db.character.CharacterEntity
+import me.alexpetrakov.morty.common.data.db.page.PageEntity
+import me.alexpetrakov.morty.common.data.network.CharacterPageJson
+import me.alexpetrakov.morty.common.data.network.RickAndMortyApi
+import me.alexpetrakov.morty.common.data.network.toEntity
 import retrofit2.HttpException
 import java.io.IOException
 import java.time.Duration

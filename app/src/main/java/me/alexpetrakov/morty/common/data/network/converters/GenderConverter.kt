@@ -1,8 +1,8 @@
-package me.alexpetrakov.morty.characters.data.network.converters
+package me.alexpetrakov.morty.common.data.network.converters
 
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.ToJson
-import me.alexpetrakov.morty.characters.domain.Gender
+import me.alexpetrakov.morty.common.domain.Gender
 
 class GenderConverter {
 

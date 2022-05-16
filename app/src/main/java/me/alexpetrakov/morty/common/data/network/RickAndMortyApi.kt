@@ -1,4 +1,4 @@
-package me.alexpetrakov.morty.characters.data.network
+package me.alexpetrakov.morty.common.data.network
 
 import me.alexpetrakov.morty.BuildConfig
 import retrofit2.http.GET

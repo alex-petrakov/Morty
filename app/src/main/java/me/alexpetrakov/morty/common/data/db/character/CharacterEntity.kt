@@ -1,14 +1,14 @@
-package me.alexpetrakov.morty.characters.data.db.character
+package me.alexpetrakov.morty.common.data.db.character
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.ForeignKey.CASCADE
 import androidx.room.PrimaryKey
-import me.alexpetrakov.morty.characters.data.db.page.PageEntity
-import me.alexpetrakov.morty.characters.domain.Character
-import me.alexpetrakov.morty.characters.domain.Gender
-import me.alexpetrakov.morty.characters.domain.VitalStatus
+import me.alexpetrakov.morty.common.data.db.page.PageEntity
+import me.alexpetrakov.morty.common.domain.Character
+import me.alexpetrakov.morty.common.domain.Gender
+import me.alexpetrakov.morty.common.domain.VitalStatus
 
 @Entity(
     tableName = "characters",

@@ -1,12 +1,12 @@
-package me.alexpetrakov.morty.characters.data.network
+package me.alexpetrakov.morty.common.data.network
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import me.alexpetrakov.morty.characters.data.db.character.CharacterEntity
-import me.alexpetrakov.morty.characters.data.db.characterdetails.CharacterDetailsEntity
-import me.alexpetrakov.morty.characters.data.db.characterdetails.EpisodeEntity
-import me.alexpetrakov.morty.characters.domain.Gender
-import me.alexpetrakov.morty.characters.domain.VitalStatus
+import me.alexpetrakov.morty.common.data.db.character.CharacterEntity
+import me.alexpetrakov.morty.common.data.db.characterdetails.CharacterDetailsEntity
+import me.alexpetrakov.morty.common.data.db.characterdetails.EpisodeEntity
+import me.alexpetrakov.morty.common.domain.Gender
+import me.alexpetrakov.morty.common.domain.VitalStatus
 import java.time.Instant
 
 @JsonClass(generateAdapter = true)
