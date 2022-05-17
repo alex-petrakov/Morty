@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">@color/purple_500</color>
-    <color name="primary_variant">@color/purple_700</color>
+    <color name="primary">@color/green_500</color>
+    <color name="primary_variant">@color/green_700</color>
     <color name="on_primary">@color/white</color>
     <color name="secondary">@color/teal_200</color>
     <color name="secondary_variant">@color/teal_700</color>
@@ -9,9 +9,9 @@
 
     <color name="status_bar">@color/primary</color>
 
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
+    <color name="green_200">#FF66E078</color>
+    <color name="green_500">#FF2AAD4A</color>
+    <color name="green_700">#007C1C</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
