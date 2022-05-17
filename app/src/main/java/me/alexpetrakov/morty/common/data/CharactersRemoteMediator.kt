@@ -31,7 +31,7 @@ class CharactersRemoteMediator @Inject constructor(
     ): MediatorResult {
         return when (loadType) {
             LoadType.REFRESH -> loadPageNear(state.lastAccessedItemOrNull)
-            LoadType.PREPEND -> loadPageBefore(state.firstItemOrNull())
+            LoadType.PREPEND -> MediatorResult.Success(endOfPaginationReached = true)
             LoadType.APPEND -> loadPageAfter(state.lastItemOrNull())
         }
     }
@@ -47,15 +47,6 @@ class CharactersRemoteMediator @Inject constructor(
         return when (val response = loadPageIntoCache(pageUrl, invalidateCache = true)) {
             null -> MediatorResult.Error(Throwable())
             else -> MediatorResult.Success(endOfPaginationReached = !response.hasNextPages)
-        }
-    }
-
-    private suspend fun loadPageBefore(character: CharacterEntity?): MediatorResult {
-        val characterId = character?.id ?: return MediatorResult.Success(false)
-        val pageUrl = getPageKeyBefore(characterId) ?: return MediatorResult.Success(true)
-        return when (val response = loadPageIntoCache(pageUrl, invalidateCache = false)) {
-            null -> MediatorResult.Error(Throwable())
-            else -> MediatorResult.Success(endOfPaginationReached = !response.hasPreviousPages)
         }
     }
 
@@ -92,10 +83,6 @@ class CharactersRemoteMediator @Inject constructor(
 
     private suspend fun getPageKeyAfter(characterId: Int): String? {
         return pageCache.getAssociatedPageFor(characterId)?.nextPageUrl
-    }
-
-    private suspend fun getPageKeyBefore(characterId: Int): String? {
-        return pageCache.getAssociatedPageFor(characterId)?.previousPageUrl
     }
 }
 
