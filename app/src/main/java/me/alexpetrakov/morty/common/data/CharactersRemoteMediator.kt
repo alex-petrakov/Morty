@@ -48,64 +48,61 @@ class CharactersRemoteMediator @Inject constructor(
         loadType: LoadType,
         state: PagingState<Int, CharacterEntity>
     ): MediatorResult {
-        val pageUrl = when (val action = determineNextActionFor(loadType, state)) {
-            Action.Finish -> return MediatorResult.Success(endOfPaginationReached = true)
-            Action.SkipPage -> return MediatorResult.Success(endOfPaginationReached = false)
-            is Action.LoadPage -> action.pageUrl
+        return when (loadType) {
+            LoadType.REFRESH -> loadPageNear(state.lastAccessedItemOrNull)
+            LoadType.PREPEND -> loadPageBefore(state.firstItemOrNull())
+            LoadType.APPEND -> loadPageAfter(state.lastItemOrNull())
         }
+    }
 
+    private suspend fun loadPageNear(
+        character: CharacterEntity?,
+        firstPageUrl: String = RickAndMortyApi.FIRST_CHARACTER_PAGE_URL
+    ): MediatorResult {
+        val pageUrl = when (val characterId = character?.id) {
+            null -> firstPageUrl
+            else -> getPageKeyNear(characterId) ?: firstPageUrl
+        }
+        return when (val response = loadPageIntoCache(pageUrl, invalidateCache = true)) {
+            null -> MediatorResult.Error(Throwable())
+            else -> MediatorResult.Success(endOfPaginationReached = !response.hasNextPages)
+        }
+    }
+
+    private suspend fun loadPageBefore(character: CharacterEntity?): MediatorResult {
+        val characterId = character?.id ?: return MediatorResult.Success(true)
+        val pageUrl = getPageKeyBefore(characterId) ?: return MediatorResult.Success(true)
+        return when (val response = loadPageIntoCache(pageUrl, invalidateCache = false)) {
+            null -> MediatorResult.Error(Throwable())
+            else -> MediatorResult.Success(endOfPaginationReached = !response.hasPreviousPages)
+        }
+    }
+
+    private suspend fun loadPageAfter(character: CharacterEntity?): MediatorResult {
+        val characterId = character?.id ?: return MediatorResult.Success(true)
+        val pageUrl = getPageKeyAfter(characterId) ?: return MediatorResult.Success(true)
+        return when (val response = loadPageIntoCache(pageUrl, invalidateCache = false)) {
+            null -> MediatorResult.Error(Throwable())
+            else -> MediatorResult.Success(endOfPaginationReached = !response.hasNextPages)
+        }
+    }
+
+    private suspend fun loadPageIntoCache(
+        pageUrl: String,
+        invalidateCache: Boolean
+    ): CharacterPageJson? {
         val response = try {
             api.getCharacterPage(pageUrl)
         } catch (e: Exception) {
             when (e) {
                 is IOException, is HttpException, is JsonDataException -> {
-                    return MediatorResult.Error(e)
+                    return null
                 }
                 else -> throw e
             }
         }
-
-        cacheResponse(response, pageUrl, invalidateCache = loadType == LoadType.REFRESH)
-        return MediatorResult.Success(endOfPaginationReached = !response.hasMorePages)
-    }
-
-    private suspend fun determineNextActionFor(
-        loadType: LoadType,
-        state: PagingState<Int, CharacterEntity>
-    ): Action {
-        return when (loadType) {
-            LoadType.REFRESH -> refresh(state)
-            LoadType.PREPEND -> prepend(state)
-            LoadType.APPEND -> append(state)
-        }
-    }
-
-    private suspend fun refresh(
-        state: PagingState<Int, CharacterEntity>,
-        firstPageUrl: String = RickAndMortyApi.FIRST_CHARACTER_PAGE_URL
-    ): Action {
-        val lastAccessedCharacter = state.lastAccessedCharacter
-        val currentPage = getPageFor(lastAccessedCharacter)
-        val pageUrl = currentPage?.url ?: firstPageUrl
-        return Action.LoadPage(pageUrl)
-    }
-
-    private suspend fun append(state: PagingState<Int, CharacterEntity>): Action {
-        val lastCharacter = state.lastItemOrNull()
-        val currentPage = getPageFor(lastCharacter) ?: return Action.SkipPage
-        val pageUrl = currentPage.nextPageUrl ?: return Action.Finish
-        return Action.LoadPage(pageUrl)
-    }
-
-    private suspend fun prepend(state: PagingState<Int, CharacterEntity>): Action {
-        val firstCharacter = state.firstItemOrNull()
-        val currentPage = getPageFor(firstCharacter) ?: return Action.SkipPage
-        val pageUrl = currentPage.previousPageUrl ?: return Action.Finish
-        return Action.LoadPage(pageUrl)
-    }
-
-    private suspend fun getPageFor(firstCharacter: CharacterEntity?): PageEntity? {
-        return firstCharacter?.let { pageDao.getByCharacterId(it.id) }
+        cacheResponse(response, pageUrl, invalidateCache)
+        return response
     }
 
     private suspend fun cacheResponse(
@@ -124,17 +121,25 @@ class CharactersRemoteMediator @Inject constructor(
         }
     }
 
-    private sealed class Action {
-        object Finish : Action()
-        object SkipPage : Action()
-        data class LoadPage(val pageUrl: String) : Action()
+    private suspend fun getPageKeyNear(characterId: Int): String? {
+        return pageDao.getByCharacterId(characterId)?.url
+    }
+
+    private suspend fun getPageKeyAfter(characterId: Int): String? {
+        return pageDao.getByCharacterId(characterId)?.nextPageUrl
+    }
+
+    private suspend fun getPageKeyBefore(characterId: Int): String? {
+        return pageDao.getByCharacterId(characterId)?.previousPageUrl
     }
 }
 
-private val PagingState<Int, CharacterEntity>.lastAccessedCharacter: CharacterEntity?
+private val PagingState<Int, CharacterEntity>.lastAccessedItemOrNull: CharacterEntity?
     get() = anchorPosition?.let { closestItemToPosition(it) }
 
-private val CharacterPageJson.hasMorePages get() = pageInfo.nextUrl != null
+private val CharacterPageJson.hasNextPages get() = pageInfo.nextUrl != null
+
+private val CharacterPageJson.hasPreviousPages get() = pageInfo.previousUrl != null
 
 private val CharacterPageJson.nextPageUrl get() = pageInfo.nextUrl
 
