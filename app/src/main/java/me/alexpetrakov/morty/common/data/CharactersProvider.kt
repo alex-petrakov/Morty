@@ -89,6 +89,6 @@ class CharactersProvider @Inject constructor(
 
     companion object {
         private const val DEFAULT_PAGE_SIZE = 20
-        private const val PRELOADED_PAGE_COUNT = 3
+        private const val PRELOADED_PAGE_COUNT = 1
     }
 }
