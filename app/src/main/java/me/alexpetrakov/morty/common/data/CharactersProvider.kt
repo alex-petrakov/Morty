@@ -4,6 +4,7 @@ import androidx.paging.*
 import com.squareup.moshi.JsonDataException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import me.alexpetrakov.morty.common.data.cache.CacheLifetime
 import me.alexpetrakov.morty.common.data.db.CharacterDatabase
 import me.alexpetrakov.morty.common.data.db.character.toDomainModel
 import me.alexpetrakov.morty.common.data.db.characterdetails.CharacterDetailsEntity

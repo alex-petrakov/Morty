@@ -9,13 +9,14 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import me.alexpetrakov.morty.common.data.AndroidResourceProvider
-import me.alexpetrakov.morty.common.data.CacheLifetime
 import me.alexpetrakov.morty.common.data.CharactersProvider
+import me.alexpetrakov.morty.common.data.cache.CacheLifetime
 import me.alexpetrakov.morty.common.data.db.CharacterDatabase
 import me.alexpetrakov.morty.common.data.network.RickAndMortyApi
 import me.alexpetrakov.morty.common.domain.repositories.CharactersRepository
 import me.alexpetrakov.morty.common.domain.repositories.ResourceProvider
 import retrofit2.Retrofit
+import java.time.Clock
 import java.time.Duration
 import javax.inject.Singleton
 
@@ -43,6 +44,10 @@ interface CommonDiModule {
             return Room.databaseBuilder(context, CharacterDatabase::class.java, "morty.db")
                 .build()
         }
+
+        @Provides
+        @Singleton
+        fun provideClock(): Clock = Clock.systemDefaultZone()
 
         @Provides
         @CacheLifetime

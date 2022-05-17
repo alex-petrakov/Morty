@@ -4,44 +4,25 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import androidx.room.withTransaction
+import androidx.paging.RemoteMediator.InitializeAction.LAUNCH_INITIAL_REFRESH
+import androidx.paging.RemoteMediator.InitializeAction.SKIP_INITIAL_REFRESH
 import com.squareup.moshi.JsonDataException
-import me.alexpetrakov.morty.common.data.db.CharacterDatabase
+import me.alexpetrakov.morty.common.data.cache.PageCache
 import me.alexpetrakov.morty.common.data.db.character.CharacterEntity
-import me.alexpetrakov.morty.common.data.db.page.PageEntity
 import me.alexpetrakov.morty.common.data.network.CharacterPageJson
 import me.alexpetrakov.morty.common.data.network.RickAndMortyApi
-import me.alexpetrakov.morty.common.data.network.toEntity
 import retrofit2.HttpException
 import java.io.IOException
-import java.time.Duration
-import java.time.Instant
 import javax.inject.Inject
 
 @OptIn(ExperimentalPagingApi::class)
 class CharactersRemoteMediator @Inject constructor(
     private val api: RickAndMortyApi,
-    private val db: CharacterDatabase,
-    @CacheLifetime private val maxCacheLifetime: Duration
+    private val pageCache: PageCache,
 ) : RemoteMediator<Int, CharacterEntity>() {
 
-    private val characterDao = db.characterDao()
-
-    private val pageDao = db.pageDao()
-
-    init {
-        require(!maxCacheLifetime.isNegative) { "Cache lifetime should be positive ($maxCacheLifetime)" }
-    }
-
     override suspend fun initialize(): InitializeAction {
-        val now = Instant.now()
-        val updatedAt = pageDao.lastUpdateInstant() ?: Instant.MIN
-        val actualCacheLifetime = Duration.between(updatedAt, now)
-        return if (actualCacheLifetime.isNegative || actualCacheLifetime > maxCacheLifetime) {
-            InitializeAction.LAUNCH_INITIAL_REFRESH
-        } else {
-            InitializeAction.SKIP_INITIAL_REFRESH
-        }
+        return if (pageCache.hasFreshPages()) SKIP_INITIAL_REFRESH else LAUNCH_INITIAL_REFRESH
     }
 
     override suspend fun load(
@@ -101,36 +82,20 @@ class CharactersRemoteMediator @Inject constructor(
                 else -> throw e
             }
         }
-        cacheResponse(response, pageUrl, invalidateCache)
+        pageCache.storePage(response, pageUrl, invalidateCache)
         return response
     }
 
-    private suspend fun cacheResponse(
-        response: CharacterPageJson,
-        pageUrl: String,
-        invalidateCache: Boolean
-    ) {
-        db.withTransaction {
-            if (invalidateCache) {
-                pageDao.deleteAll()
-            }
-            pageDao.insert(
-                PageEntity(pageUrl, response.nextPageUrl, response.prevPageUrl, Instant.now())
-            )
-            characterDao.insertAll(response.characters.map { it.toEntity(pageUrl) })
-        }
-    }
-
     private suspend fun getPageKeyNear(characterId: Int): String? {
-        return pageDao.getByCharacterId(characterId)?.url
+        return pageCache.getAssociatedPageFor(characterId)?.url
     }
 
     private suspend fun getPageKeyAfter(characterId: Int): String? {
-        return pageDao.getByCharacterId(characterId)?.nextPageUrl
+        return pageCache.getAssociatedPageFor(characterId)?.nextPageUrl
     }
 
     private suspend fun getPageKeyBefore(characterId: Int): String? {
-        return pageDao.getByCharacterId(characterId)?.previousPageUrl
+        return pageCache.getAssociatedPageFor(characterId)?.previousPageUrl
     }
 }
 
@@ -140,7 +105,3 @@ private val PagingState<Int, CharacterEntity>.lastAccessedItemOrNull: CharacterE
 private val CharacterPageJson.hasNextPages get() = pageInfo.nextUrl != null
 
 private val CharacterPageJson.hasPreviousPages get() = pageInfo.previousUrl != null
-
-private val CharacterPageJson.nextPageUrl get() = pageInfo.nextUrl
-
-private val CharacterPageJson.prevPageUrl get() = pageInfo.previousUrl
