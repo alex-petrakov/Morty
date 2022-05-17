@@ -18,15 +18,22 @@ import java.io.IOException
 import java.time.Duration
 import java.time.Instant
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Singleton
 class CharactersProvider @Inject constructor(
     private val api: RickAndMortyApi,
-    private val db: CharacterDatabase
+    private val db: CharacterDatabase,
+    private val remoteMediatorProvider: Provider<CharactersRemoteMediator>,
+    @CacheLifetime private val maxCacheLifetime: Duration
 ) : CharactersRepository {
 
     private val characterDetailsDao = db.characterDetailsDao()
+
+    init {
+        require(!maxCacheLifetime.isNegative) { "Cache lifetime should be positive ($maxCacheLifetime)" }
+    }
 
     @OptIn(ExperimentalPagingApi::class)
     override fun getCharacters(): Flow<PagingData<Character>> {
@@ -36,7 +43,7 @@ class CharactersProvider @Inject constructor(
                 enablePlaceholders = true,
                 initialLoadSize = PRELOADED_PAGE_COUNT * DEFAULT_PAGE_SIZE
             ),
-            remoteMediator = CharactersRemoteMediator(api, db, MAX_CACHE_LIFETIME),
+            remoteMediator = remoteMediatorProvider.get(),
             pagingSourceFactory = { db.characterDao().getAll() }
         ).flow
         return flowOfPagingData.map { pagingData ->
@@ -76,13 +83,11 @@ class CharactersProvider @Inject constructor(
     private val CharacterDetailsEntity.isStale: Boolean
         get() {
             val lifetime = Duration.between(lastUpdateInstant, Instant.now())
-            return lifetime.isNegative || lifetime > MAX_CACHE_LIFETIME
+            return lifetime.isNegative || lifetime > maxCacheLifetime
         }
 
     companion object {
         private const val DEFAULT_PAGE_SIZE = 20
         private const val PRELOADED_PAGE_COUNT = 3
-
-        private val MAX_CACHE_LIFETIME = Duration.ofHours(1)
     }
 }

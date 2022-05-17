@@ -16,17 +16,22 @@ import retrofit2.HttpException
 import java.io.IOException
 import java.time.Duration
 import java.time.Instant
+import javax.inject.Inject
 
 @OptIn(ExperimentalPagingApi::class)
-class CharactersRemoteMediator(
+class CharactersRemoteMediator @Inject constructor(
     private val api: RickAndMortyApi,
     private val db: CharacterDatabase,
-    private val maxCacheLifetime: Duration
+    @CacheLifetime private val maxCacheLifetime: Duration
 ) : RemoteMediator<Int, CharacterEntity>() {
 
     private val characterDao = db.characterDao()
 
     private val pageDao = db.pageDao()
+
+    init {
+        require(!maxCacheLifetime.isNegative) { "Cache lifetime should be positive ($maxCacheLifetime)" }
+    }
 
     override suspend fun initialize(): InitializeAction {
         val now = Instant.now()
