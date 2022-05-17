@@ -51,7 +51,7 @@ class CharactersRemoteMediator @Inject constructor(
     }
 
     private suspend fun loadPageBefore(character: CharacterEntity?): MediatorResult {
-        val characterId = character?.id ?: return MediatorResult.Success(true)
+        val characterId = character?.id ?: return MediatorResult.Success(false)
         val pageUrl = getPageKeyBefore(characterId) ?: return MediatorResult.Success(true)
         return when (val response = loadPageIntoCache(pageUrl, invalidateCache = false)) {
             null -> MediatorResult.Error(Throwable())
@@ -60,7 +60,7 @@ class CharactersRemoteMediator @Inject constructor(
     }
 
     private suspend fun loadPageAfter(character: CharacterEntity?): MediatorResult {
-        val characterId = character?.id ?: return MediatorResult.Success(true)
+        val characterId = character?.id ?: return MediatorResult.Success(false)
         val pageUrl = getPageKeyAfter(characterId) ?: return MediatorResult.Success(true)
         return when (val response = loadPageIntoCache(pageUrl, invalidateCache = false)) {
             null -> MediatorResult.Error(Throwable())
