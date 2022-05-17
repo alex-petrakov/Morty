@@ -66,7 +66,7 @@ class CharacterDetailsFragment : Fragment() {
 
     private fun render(state: ViewState): Unit = with(binding) {
         contentView.isVisible = state is ViewState.Content
-        progressBar.isVisible = state == ViewState.Loading
+        if (state == ViewState.Loading) progressBar.show() else progressBar.hide()
         errorLayout.root.isVisible = state == ViewState.Error
 
         if (state is ViewState.Content) {
