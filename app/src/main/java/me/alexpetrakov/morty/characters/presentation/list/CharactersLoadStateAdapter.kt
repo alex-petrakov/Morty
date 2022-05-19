@@ -33,7 +33,11 @@ class CharactersLoadStateAdapter(
 
         fun bind(loadState: LoadState): Unit = with(binding) {
             errorLayout.root.isVisible = loadState is LoadState.Error
-            progressBar.isVisible = loadState is LoadState.Loading
+            if (loadState is LoadState.Loading) {
+                progressBar.show()
+            } else {
+                progressBar.hide()
+            }
         }
     }
 }
