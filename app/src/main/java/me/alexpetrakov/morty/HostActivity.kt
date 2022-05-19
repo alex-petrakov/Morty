@@ -22,7 +22,7 @@ class HostActivity : AppCompatActivity() {
         val binding = ActivityHostBinding.inflate(layoutInflater, null, false)
         setContentView(binding.root)
 
-        if (supportFragmentManager.findFragmentById(R.id.fragment_container) == null) {
+        if (savedInstanceState == null) {
             navigator.applyCommands(arrayOf(Replace(AppScreens.characters())))
         }
     }
