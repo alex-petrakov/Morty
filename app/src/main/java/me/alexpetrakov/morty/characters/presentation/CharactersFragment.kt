@@ -16,6 +16,8 @@ import com.google.android.material.transition.MaterialSharedAxis
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.*
 import me.alexpetrakov.morty.R
+import me.alexpetrakov.morty.characters.presentation.list.CharactersAdapter
+import me.alexpetrakov.morty.characters.presentation.list.CharactersLoadStateAdapter
 import me.alexpetrakov.morty.common.presentation.extensions.viewLifecycle
 import me.alexpetrakov.morty.common.presentation.extensions.viewLifecycleScope
 import me.alexpetrakov.morty.databinding.FragmentCharactersBinding

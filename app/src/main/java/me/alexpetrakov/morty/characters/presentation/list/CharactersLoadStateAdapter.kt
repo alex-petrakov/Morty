@@ -1,4 +1,4 @@
-package me.alexpetrakov.morty.characters.presentation
+package me.alexpetrakov.morty.characters.presentation.list
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

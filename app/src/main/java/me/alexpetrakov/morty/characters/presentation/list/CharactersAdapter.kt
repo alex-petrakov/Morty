@@ -1,4 +1,4 @@
-package me.alexpetrakov.morty.characters.presentation
+package me.alexpetrakov.morty.characters.presentation.list
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -7,6 +7,7 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
+import me.alexpetrakov.morty.characters.presentation.CharacterUiModel
 import me.alexpetrakov.morty.databinding.ItemCharacterBinding
 
 class CharactersAdapter(
