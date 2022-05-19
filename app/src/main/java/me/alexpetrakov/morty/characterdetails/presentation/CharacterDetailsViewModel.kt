@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import me.alexpetrakov.morty.common.domain.repositories.CharactersRepository
 import me.alexpetrakov.morty.common.domain.repositories.ResourceProvider
@@ -21,7 +21,7 @@ class CharacterDetailsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _viewState = MutableStateFlow<ViewState>(ViewState.Loading)
-    val viewState: SharedFlow<ViewState> get() = _viewState
+    val viewState: StateFlow<ViewState> get() = _viewState
 
     init {
         loadDetails()
