@@ -4,6 +4,7 @@ import androidx.recyclerview.widget.DiffUtil
 import me.alexpetrakov.morty.common.domain.model.Character
 import me.alexpetrakov.morty.common.domain.repositories.ResourceProvider
 import me.alexpetrakov.morty.common.presentation.mappers.toUiModel
+import me.alexpetrakov.morty.common.presentation.paging.PagingState
 
 sealed class ViewState {
     data class Content(val characters: List<CharacterUiModel>) : ViewState()
@@ -33,6 +34,22 @@ data class CharacterUiModel(
             return old == new
         }
     }
+}
+
+
+fun PagingState<Character>.toViewState(resourceProvider: ResourceProvider): ViewState {
+    return when (this) {
+        PagingState.Loading -> ViewState.Loading
+        PagingState.Empty -> ViewState.Content(emptyList())
+        is PagingState.Content -> ViewState.Content(items.toUiModel(resourceProvider))
+        is PagingState.Error -> ViewState.Error
+        is PagingState.LoadingPage -> ViewState.Content(items.toUiModel(resourceProvider))
+        is PagingState.Refreshing -> ViewState.Refreshing(items.toUiModel(resourceProvider))
+    }
+}
+
+fun List<Character>.toUiModel(resourceProvider: ResourceProvider): List<CharacterUiModel> {
+    return map { it.toUiModel(resourceProvider) }
 }
 
 fun Character.toUiModel(resourceProvider: ResourceProvider): CharacterUiModel {

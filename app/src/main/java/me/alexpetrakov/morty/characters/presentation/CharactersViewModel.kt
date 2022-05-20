@@ -14,6 +14,7 @@ import me.alexpetrakov.morty.common.domain.model.Character
 import me.alexpetrakov.morty.common.domain.repositories.CharactersRepository
 import me.alexpetrakov.morty.common.domain.repositories.ResourceProvider
 import me.alexpetrakov.morty.common.presentation.paging.Pager
+import me.alexpetrakov.morty.common.presentation.paging.PagingState
 import me.alexpetrakov.morty.common.presentation.paging.ViewController
 import javax.inject.Inject
 
@@ -33,54 +34,28 @@ class CharactersViewModel @Inject constructor(
     val viewEffect: SharedFlow<ViewEffect> get() = _viewEffect
 
     init {
-        viewModelScope.launch {
-            pager.refresh()
-        }
+        pager.refresh()
     }
 
     fun onRefresh() {
-        viewModelScope.launch {
-            pager.refresh()
-        }
+        pager.refresh()
     }
 
     fun onLoadNextPage() {
-        viewModelScope.launch {
-            pager.loadNextPage()
-        }
+        pager.loadNextPage()
     }
 
-    override fun setLoading() {
-        _viewState.value = ViewState.Loading
+    override fun setPagingState(state: PagingState<Character>) {
+        _viewState.value = state.toViewState(resourceProvider)
     }
 
-    override fun setEmpty() {
-        _viewState.value = ViewState.Content(emptyList())
-    }
-
-    override fun setError(e: Exception) {
-        _viewState.value = ViewState.Error
-    }
-
-    override fun setContent(content: List<Character>) {
-        _viewState.value = ViewState.Content(content.map { it.toUiModel(resourceProvider) })
-    }
-
-    override fun setRefreshing(content: List<Character>) {
-        _viewState.value = ViewState.Refreshing(content.map { it.toUiModel(resourceProvider) })
-    }
-
-    override fun setLoadingPage(content: List<Character>) {
-        _viewState.value = ViewState.Content(content.map { it.toUiModel(resourceProvider) })
-    }
-
-    override fun showRefreshError() {
+    override fun displayRefreshError(e: Exception) {
         viewModelScope.launch {
             _viewEffect.emit(ViewEffect.DISPLAY_REFRESH_ERROR)
         }
     }
 
-    override fun showPageLoadError() {
+    override fun displayPageLoadError(e: Exception) {
         viewModelScope.launch {
             _viewEffect.emit(ViewEffect.DISPLAY_PAGE_LOAD_ERROR)
         }

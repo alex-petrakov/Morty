@@ -63,7 +63,7 @@ class Pager<T>(
 
         override fun refresh() {
             currentState = Loading()
-            viewController.setLoading()
+            viewController.setPagingState(PagingState.Loading)
             loadPage(FIRST_PAGE)
         }
 
@@ -79,17 +79,17 @@ class Pager<T>(
             currentState = Content()
             list = items
             currentPage = FIRST_PAGE
-            viewController.setContent(list)
+            viewController.setPagingState(PagingState.Content(list))
         }
 
         override fun onError(e: Exception) {
             currentState = Error()
-            viewController.setError(e)
+            viewController.setPagingState(PagingState.Error(e))
         }
 
         override fun onEmptyPageLoaded() {
             currentState = Empty()
-            viewController.setEmpty()
+            viewController.setPagingState(PagingState.Empty)
         }
 
         override fun release() {
@@ -102,13 +102,13 @@ class Pager<T>(
 
         override fun refresh() {
             currentState = Refreshing()
-            viewController.setRefreshing(list)
+            viewController.setPagingState(PagingState.Refreshing(list))
             loadPage(FIRST_PAGE)
         }
 
         override fun loadNextPage() {
             currentState = LoadingPage()
-            viewController.setLoadingPage(list)
+            viewController.setPagingState(PagingState.LoadingPage(list))
             loadPage(currentPage + 1)
         }
 
@@ -150,18 +150,18 @@ class Pager<T>(
             currentState = Content()
             list = items
             currentPage = FIRST_PAGE
-            viewController.setContent(list)
+            viewController.setPagingState(PagingState.Content(list))
         }
 
         override fun onError(e: Exception) {
             currentState = Content()
-            viewController.setContent(list)
-            viewController.showRefreshError()
+            viewController.setPagingState(PagingState.Content(list))
+            viewController.displayRefreshError(e)
         }
 
         override fun onEmptyPageLoaded() {
             currentState = Empty()
-            viewController.setEmpty()
+            viewController.setPagingState(PagingState.Empty)
         }
 
         override fun release() {
@@ -174,7 +174,7 @@ class Pager<T>(
 
         override fun refresh() {
             currentState = Refreshing()
-            viewController.setRefreshing(list)
+            viewController.setPagingState(PagingState.Refreshing(list))
             loadPage(FIRST_PAGE)
         }
 
@@ -182,17 +182,17 @@ class Pager<T>(
             currentState = Content()
             list = list + items
             currentPage++
-            viewController.setContent(list)
+            viewController.setPagingState(PagingState.Content(list))
         }
 
         override fun onError(e: Exception) {
             currentState = Content()
-            viewController.showPageLoadError()
+            viewController.displayPageLoadError(e)
         }
 
         override fun onEmptyPageLoaded() {
             currentState = AllContent()
-            viewController.setContent(list)
+            viewController.setPagingState(PagingState.Content(list))
         }
 
         override fun release() {
@@ -205,7 +205,7 @@ class Pager<T>(
 
         override fun refresh() {
             currentState = Refreshing()
-            viewController.setRefreshing(list)
+            viewController.setPagingState(PagingState.Refreshing(list))
             loadPage(FIRST_PAGE)
         }
 
