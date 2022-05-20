@@ -8,16 +8,15 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
-import androidx.paging.PagingData
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.elevation.ElevationOverlayProvider
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialSharedAxis
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import me.alexpetrakov.morty.R
 import me.alexpetrakov.morty.characters.presentation.list.CharactersAdapter
-import me.alexpetrakov.morty.characters.presentation.list.CharactersLoadStateAdapter
 import me.alexpetrakov.morty.common.presentation.extensions.viewLifecycle
 import me.alexpetrakov.morty.common.presentation.extensions.viewLifecycleScope
 import me.alexpetrakov.morty.databinding.FragmentCharactersBinding
@@ -33,7 +32,8 @@ class CharactersFragment : Fragment() {
 
     private val charactersAdapter = CharactersAdapter(
         this,
-        onCharacterClick = { character -> viewModel.onCharacterClicked(character) }
+        onCharacterClick = { character -> viewModel.onCharacterClicked(character) },
+        onRequestNextPage = { viewModel.onLoadNextPage() }
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,10 +63,7 @@ class CharactersFragment : Fragment() {
         recyclerView.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(requireContext())
-            adapter = charactersAdapter.withLoadStateHeaderAndFooter(
-                header = CharactersLoadStateAdapter { charactersAdapter.retry() },
-                footer = CharactersLoadStateAdapter { charactersAdapter.retry() },
-            )
+            adapter = charactersAdapter
         }
         swipeRefreshLayout.apply {
             val surfaceColorAt3Dp = ElevationOverlayProvider(requireContext())
@@ -74,72 +71,42 @@ class CharactersFragment : Fragment() {
             setProgressBackgroundColorSchemeColor(surfaceColorAt3Dp)
             setColorSchemeResources(R.color.primary)
             setProgressViewEndTarget(true, progressViewEndOffset)
-            setOnRefreshListener { charactersAdapter.refresh() }
+            setOnRefreshListener { viewModel.onRefresh() }
         }
-        binding.errorLayout.retryButton.setOnClickListener { charactersAdapter.refresh() }
+        binding.errorLayout.retryButton.setOnClickListener { viewModel.onRefresh() }
     }
 
     private fun subscribeToModel(): Unit = with(viewModel) {
-        viewModel.pagingData
+        viewModel.viewState
             .onEach(::render)
             .flowWithLifecycle(viewLifecycle)
             .launchIn(viewLifecycleScope)
-
-        val viewStates = charactersAdapter.loadStateFlow
-            .map { CompoundPagingState.from(it) }
-            .distinctUntilChanged()
-            .map { pagingState ->
-                ViewState.of(
-                    pagingState,
-                    isRefreshing = binding.swipeRefreshLayout.isRefreshing,
-                    hasLocalData = charactersAdapter.itemCount > 0
-                )
-            }
-
-        viewStates
-            .onEach(::render)
-            .flowWithLifecycle(viewLifecycle)
-            .launchIn(viewLifecycleScope)
-
-        viewStates
-            .withPrevious()
-            .mapNotNull(::statesToViewEffect)
+        viewModel.viewEffect
             .onEach(::handle)
             .flowWithLifecycle(viewLifecycle)
             .launchIn(viewLifecycleScope)
     }
 
-    private fun Flow<ViewState>.withPrevious(): Flow<Pair<ViewState?, ViewState>> {
-        return this.onStart<ViewState?> { emit(null) }
-            .zip(this) { prev, current -> prev to current }
-    }
-
-    private fun statesToViewEffect(states: Pair<ViewState?, ViewState>): ViewEffect? {
-        val (prev, current) = states
-        return if (prev != null && prev != current && current == ViewState.REFRESH_ERROR) {
-            ViewEffect.DISPLAY_REFRESH_ERROR
-        } else {
-            null
-        }
-    }
-
-    private fun render(pagingData: PagingData<CharacterUiModel>) {
-        charactersAdapter.submitData(viewLifecycle, pagingData)
-    }
-
     private fun render(viewState: ViewState): Unit = with(binding) {
-        if (viewState == ViewState.LOADING_FIRST_PAGE) progressBar.show() else progressBar.hide()
-
-        swipeRefreshLayout.isRefreshing = viewState == ViewState.REFRESHING
-
-        swipeRefreshLayout.isVisible = viewState == ViewState.REFRESHING ||
-                viewState == ViewState.REFRESH_ERROR ||
-                viewState == ViewState.CONTENT
-        binding.errorLayout.root.isVisible = viewState == ViewState.ERROR
+        if (viewState == ViewState.Loading) progressBar.show() else progressBar.hide()
+        swipeRefreshLayout.isRefreshing = viewState is ViewState.Refreshing
+        swipeRefreshLayout.isVisible = viewState is ViewState.Refreshing ||
+                viewState is ViewState.Content
+        binding.errorLayout.root.isVisible = viewState is ViewState.Error
+        when (viewState) {
+            is ViewState.Content -> charactersAdapter.submitList(viewState.characters)
+            is ViewState.Refreshing -> charactersAdapter.submitList(viewState.characters)
+            else -> {} // Intentionally do nothing
+        }
     }
 
     private fun handle(viewEffect: ViewEffect): Unit = with(binding) {
         when (viewEffect) {
+            ViewEffect.DISPLAY_PAGE_LOAD_ERROR -> Snackbar.make(
+                root,
+                "Unable to load page",
+                Snackbar.LENGTH_SHORT
+            ).show()
             ViewEffect.DISPLAY_REFRESH_ERROR -> Snackbar.make(
                 root,
                 R.string.app_unable_to_refresh,

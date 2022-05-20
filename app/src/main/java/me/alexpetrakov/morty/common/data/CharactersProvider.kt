@@ -1,9 +1,6 @@
 package me.alexpetrakov.morty.common.data
 
-import androidx.paging.*
 import com.squareup.moshi.JsonDataException
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import me.alexpetrakov.morty.common.data.cache.CacheLifetime
 import me.alexpetrakov.morty.common.data.db.CharacterDatabase
 import me.alexpetrakov.morty.common.data.db.character.toDomainModel
@@ -14,19 +11,18 @@ import me.alexpetrakov.morty.common.data.network.toEntity
 import me.alexpetrakov.morty.common.domain.model.Character
 import me.alexpetrakov.morty.common.domain.model.CharacterDetails
 import me.alexpetrakov.morty.common.domain.repositories.CharactersRepository
+import me.alexpetrakov.morty.common.presentation.paging.PageRequestResult
 import retrofit2.HttpException
 import java.io.IOException
 import java.time.Duration
 import java.time.Instant
 import javax.inject.Inject
-import javax.inject.Provider
 import javax.inject.Singleton
 
 @Singleton
 class CharactersProvider @Inject constructor(
     private val api: RickAndMortyApi,
-    private val db: CharacterDatabase,
-    private val remoteMediatorProvider: Provider<CharactersRemoteMediator>,
+    db: CharacterDatabase,
     @CacheLifetime private val maxCacheLifetime: Duration
 ) : CharactersRepository {
 
@@ -36,19 +32,18 @@ class CharactersProvider @Inject constructor(
         require(!maxCacheLifetime.isNegative) { "Cache lifetime should be positive ($maxCacheLifetime)" }
     }
 
-    @OptIn(ExperimentalPagingApi::class)
-    override fun getCharacters(): Flow<PagingData<Character>> {
-        val flowOfPagingData = Pager(
-            config = PagingConfig(
-                pageSize = DEFAULT_PAGE_SIZE,
-                enablePlaceholders = true,
-                initialLoadSize = PRELOADED_PAGE_COUNT * DEFAULT_PAGE_SIZE
-            ),
-            remoteMediator = remoteMediatorProvider.get(),
-            pagingSourceFactory = { db.characterDao().getAll() }
-        ).flow
-        return flowOfPagingData.map { pagingData ->
-            pagingData.map { it.toDomainModel() }
+    override suspend fun getCharacterPage(key: Int): PageRequestResult<Character> {
+        return try {
+            val list = api.getCharacterPage(key).characters
+                .map { it.toEntity("") }
+                .map { it.toDomainModel() }
+            PageRequestResult.Success(list)
+        } catch (e: IOException) {
+            PageRequestResult.Failure(e)
+        } catch (e: HttpException) {
+            PageRequestResult.Failure(e)
+        } catch (e: JsonDataException) {
+            PageRequestResult.Failure(e)
         }
     }
 

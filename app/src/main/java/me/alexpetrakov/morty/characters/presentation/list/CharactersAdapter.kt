@@ -3,7 +3,7 @@ package me.alexpetrakov.morty.characters.presentation.list
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.paging.PagingDataAdapter
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
@@ -12,8 +12,9 @@ import me.alexpetrakov.morty.databinding.ItemCharacterBinding
 
 class CharactersAdapter(
     private val fragment: Fragment,
-    private val onCharacterClick: (character: CharacterUiModel) -> Unit
-) : PagingDataAdapter<CharacterUiModel, CharactersAdapter.ViewHolder>(CharacterUiModel.DiffUtilCallback) {
+    private val onCharacterClick: (character: CharacterUiModel) -> Unit,
+    private val onRequestNextPage: () -> Unit
+) : ListAdapter<CharacterUiModel, CharactersAdapter.ViewHolder>(CharacterUiModel.DiffUtilCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -26,6 +27,9 @@ class CharactersAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        if (position == itemCount - 10) {
+            onRequestNextPage()
+        }
         return holder.bind(getItem(position))
     }
 
