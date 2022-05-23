@@ -7,8 +7,7 @@ import java.time.Instant
 
 @Entity(tableName = "pages")
 data class PageEntity(
-    @PrimaryKey @ColumnInfo(name = "url") val url: String,
-    @ColumnInfo(name = "next_page_url") val nextPageUrl: String?,
-    @ColumnInfo(name = "previous_page_url") val previousPageUrl: String?,
-    @ColumnInfo(name = "updated_at") val updatedAt: Instant
+    @PrimaryKey @ColumnInfo(name = "id") val id: Int,
+    @ColumnInfo(name = "has_next_page") val hasNextPage: Boolean,
+    @ColumnInfo(name = "updated_at") val lastUpdateInstant: Instant
 )

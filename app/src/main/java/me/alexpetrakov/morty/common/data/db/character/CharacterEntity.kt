@@ -15,8 +15,8 @@ import me.alexpetrakov.morty.common.domain.model.VitalStatus
     foreignKeys = [
         ForeignKey(
             entity = PageEntity::class,
-            parentColumns = ["url"],
-            childColumns = ["page_url"],
+            parentColumns = ["id"],
+            childColumns = ["page_id"],
             onDelete = CASCADE,
             onUpdate = CASCADE
         )
@@ -24,7 +24,7 @@ import me.alexpetrakov.morty.common.domain.model.VitalStatus
 )
 data class CharacterEntity(
     @PrimaryKey @ColumnInfo(name = "id") val id: Int,
-    @ColumnInfo(name = "page_url", index = true) val pageUrl: String,
+    @ColumnInfo(name = "page_id", index = true) val pageId: Int,
     @ColumnInfo(name = "name") val name: String,
     @ColumnInfo(name = "species") val species: String,
     @ColumnInfo(name = "gender") val gender: Gender,
@@ -34,4 +34,8 @@ data class CharacterEntity(
 
 fun CharacterEntity.toDomainModel(): Character {
     return Character(id, name, species, gender, vitalStatus, imageUrl)
+}
+
+fun Character.toEntity(pageId: Int): CharacterEntity {
+    return CharacterEntity(id, pageId, name, species, gender, vitalStatus, imageUrl)
 }

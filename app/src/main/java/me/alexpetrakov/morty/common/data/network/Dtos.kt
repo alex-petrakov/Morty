@@ -2,27 +2,13 @@ package me.alexpetrakov.morty.common.data.network
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import me.alexpetrakov.morty.common.data.db.character.CharacterEntity
-import me.alexpetrakov.morty.common.data.db.characterdetails.CharacterDetailsEntity
-import me.alexpetrakov.morty.common.data.db.characterdetails.EpisodeEntity
-import me.alexpetrakov.morty.common.data.db.page.PageEntity
-import me.alexpetrakov.morty.common.domain.model.Gender
-import me.alexpetrakov.morty.common.domain.model.VitalStatus
-import java.time.Instant
+import me.alexpetrakov.morty.common.domain.model.*
 
 @JsonClass(generateAdapter = true)
 data class CharacterPageJson(
     @Json(name = "info") val pageInfo: PageInfoJson,
     @Json(name = "results") val characters: List<CharacterJson>
 )
-
-fun CharacterPageJson.toPageEntity(url: String, updatedAt: Instant): PageEntity {
-    return PageEntity(url, pageInfo.nextUrl, pageInfo.previousUrl, updatedAt)
-}
-
-fun CharacterPageJson.toCharacterEntities(pageUrl: String): List<CharacterEntity> {
-    return characters.map { it.toEntity(pageUrl) }
-}
 
 @JsonClass(generateAdapter = true)
 data class PageInfoJson(
@@ -40,8 +26,8 @@ data class CharacterJson(
     @Json(name = "image") val imageUrl: String
 )
 
-fun CharacterJson.toEntity(pageUrl: String): CharacterEntity {
-    return CharacterEntity(id, pageUrl, name, species, gender, vitalStatus, imageUrl)
+fun CharacterJson.toDomainModel(): Character {
+    return Character(id, name, species, gender, vitalStatus, imageUrl)
 }
 
 @JsonClass(generateAdapter = true)
@@ -57,11 +43,8 @@ data class CharacterDetailsJson(
     @Json(name = "episode") val episodeUrls: List<String>
 )
 
-fun CharacterDetailsJson.toEntity(
-    episodeJson: EpisodeJson,
-    lastUpdateInstant: Instant
-): CharacterDetailsEntity {
-    return CharacterDetailsEntity(
+fun CharacterDetailsJson.toDomainModel(episode: Episode): CharacterDetails {
+    return CharacterDetails(
         id,
         name,
         species,
@@ -69,10 +52,9 @@ fun CharacterDetailsJson.toEntity(
         vitalStatus,
         originLocation.name,
         lastKnownLocation.name,
-        episodeJson.toEntity(),
+        episode,
         episodeUrls.size,
-        imageUrl,
-        lastUpdateInstant
+        imageUrl
     )
 }
 
@@ -89,6 +71,6 @@ data class EpisodeJson(
     @Json(name = "episode") val codeName: String
 )
 
-fun EpisodeJson.toEntity(): EpisodeEntity {
-    return EpisodeEntity(id, name, codeName)
+fun EpisodeJson.toDomainModel(): Episode {
+    return Episode(id, name, codeName)
 }

@@ -1,93 +1,32 @@
 package me.alexpetrakov.morty.common.data
 
-import com.squareup.moshi.JsonDataException
-import me.alexpetrakov.morty.common.data.cache.CacheLifetime
-import me.alexpetrakov.morty.common.data.db.CharacterDatabase
-import me.alexpetrakov.morty.common.data.db.character.toDomainModel
-import me.alexpetrakov.morty.common.data.db.characterdetails.CharacterDetailsEntity
-import me.alexpetrakov.morty.common.data.db.characterdetails.toDomainModel
-import me.alexpetrakov.morty.common.data.network.CharacterPageJson
-import me.alexpetrakov.morty.common.data.network.RickAndMortyApi
-import me.alexpetrakov.morty.common.data.network.toEntity
+import me.alexpetrakov.morty.common.data.cache.CharactersLocalDataSource
+import me.alexpetrakov.morty.common.data.network.CharacterRemoteDataSource
 import me.alexpetrakov.morty.common.domain.model.Character
 import me.alexpetrakov.morty.common.domain.model.CharacterDetails
 import me.alexpetrakov.morty.common.domain.repositories.CharactersRepository
 import me.alexpetrakov.morty.common.presentation.paging.PageRequestResult
-import retrofit2.HttpException
-import java.io.IOException
-import java.time.Duration
-import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class CharactersProvider @Inject constructor(
-    private val api: RickAndMortyApi,
-    db: CharacterDatabase,
-    @CacheLifetime private val maxCacheLifetime: Duration
+    private val localDataSource: CharactersLocalDataSource,
+    private val remoteDataSource: CharacterRemoteDataSource
 ) : CharactersRepository {
 
-    private val characterDetailsDao = db.characterDetailsDao()
-
-    init {
-        require(!maxCacheLifetime.isNegative) { "Cache lifetime should be positive ($maxCacheLifetime)" }
-    }
-
     override suspend fun getCharacterPage(key: Int): PageRequestResult<Character> {
-        return try {
-            val response = api.getCharacterPage(key)
-            val list = response.characters
-                .map { it.toEntity("") }
-                .map { it.toDomainModel() }
-            PageRequestResult.Success(list, hasMorePages = response.hasMorePages)
-        } catch (e: IOException) {
-            PageRequestResult.Failure(e)
-        } catch (e: HttpException) {
-            PageRequestResult.Failure(e)
-        } catch (e: JsonDataException) {
-            PageRequestResult.Failure(e)
-        }
+        val page =
+            localDataSource.getPage(key) ?: remoteDataSource.getCharacterPage(key)?.also { page ->
+                localDataSource.storePage(page, false)
+            } ?: return PageRequestResult.Failure(RuntimeException())
+        return PageRequestResult.Success(page.characters, page.hasMorePages)
     }
-
-    private val CharacterPageJson.hasMorePages: Boolean get() = pageInfo.nextUrl != null
 
     override suspend fun getCharacter(id: Int): CharacterDetails? {
-        val entity = getCachedCharacter(id) ?: loadCharacterFromApi(id)?.also {
-            characterDetailsDao.insert(it)
-        }
-        return entity?.toDomainModel()
-    }
-
-    private suspend fun getCachedCharacter(id: Int): CharacterDetailsEntity? {
-        val cachedEntity = characterDetailsDao.getById(id) ?: return null
-        return if (cachedEntity.isStale) {
-            null
-        } else {
-            cachedEntity
-        }
-    }
-
-    private suspend fun loadCharacterFromApi(id: Int): CharacterDetailsEntity? {
-        return try {
-            val detailsJson = api.getCharacterDetails(id)
-            val episodeJson = api.getEpisode(detailsJson.episodeUrls[0])
-            detailsJson.toEntity(episodeJson, lastUpdateInstant = Instant.now())
-        } catch (e: Exception) {
-            when (e) {
-                is IOException, is HttpException, is JsonDataException -> null
-                else -> throw e
+        return localDataSource.getCharacterDetails(id)
+            ?: remoteDataSource.getCharacterDetails(id)?.also { character ->
+                localDataSource.storeCharacterDetails(character)
             }
-        }
-    }
-
-    private val CharacterDetailsEntity.isStale: Boolean
-        get() {
-            val lifetime = Duration.between(lastUpdateInstant, Instant.now())
-            return lifetime.isNegative || lifetime > maxCacheLifetime
-        }
-
-    companion object {
-        private const val DEFAULT_PAGE_SIZE = 20
-        private const val PRELOADED_PAGE_COUNT = 1
     }
 }

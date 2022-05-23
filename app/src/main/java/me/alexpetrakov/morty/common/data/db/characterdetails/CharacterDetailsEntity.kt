@@ -40,6 +40,22 @@ fun CharacterDetailsEntity.toDomainModel(): CharacterDetails {
     )
 }
 
+fun CharacterDetails.toEntity(updatedAt: Instant): CharacterDetailsEntity {
+    return CharacterDetailsEntity(
+        id,
+        name,
+        species,
+        gender,
+        vitalStatus,
+        origin,
+        lastKnownLocation,
+        firstEpisode.toEntity(),
+        episodeCount,
+        imageUrl,
+        updatedAt
+    )
+}
+
 data class EpisodeEntity(
     @ColumnInfo(name = "episode_id") val id: Int,
     @ColumnInfo(name = "episode_name") val name: String,
@@ -48,4 +64,8 @@ data class EpisodeEntity(
 
 fun EpisodeEntity.toDomainModel(): Episode {
     return Episode(id, name, codeName)
+}
+
+fun Episode.toEntity(): EpisodeEntity {
+    return EpisodeEntity(id, name, codeName)
 }
