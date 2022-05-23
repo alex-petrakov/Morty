@@ -6,6 +6,7 @@ import me.alexpetrakov.morty.common.data.db.CharacterDatabase
 import me.alexpetrakov.morty.common.data.db.character.toDomainModel
 import me.alexpetrakov.morty.common.data.db.characterdetails.CharacterDetailsEntity
 import me.alexpetrakov.morty.common.data.db.characterdetails.toDomainModel
+import me.alexpetrakov.morty.common.data.network.CharacterPageJson
 import me.alexpetrakov.morty.common.data.network.RickAndMortyApi
 import me.alexpetrakov.morty.common.data.network.toEntity
 import me.alexpetrakov.morty.common.domain.model.Character
@@ -34,10 +35,11 @@ class CharactersProvider @Inject constructor(
 
     override suspend fun getCharacterPage(key: Int): PageRequestResult<Character> {
         return try {
-            val list = api.getCharacterPage(key).characters
+            val response = api.getCharacterPage(key)
+            val list = response.characters
                 .map { it.toEntity("") }
                 .map { it.toDomainModel() }
-            PageRequestResult.Success(list)
+            PageRequestResult.Success(list, hasMorePages = response.hasMorePages)
         } catch (e: IOException) {
             PageRequestResult.Failure(e)
         } catch (e: HttpException) {
@@ -46,6 +48,8 @@ class CharactersProvider @Inject constructor(
             PageRequestResult.Failure(e)
         }
     }
+
+    private val CharacterPageJson.hasMorePages: Boolean get() = pageInfo.nextUrl != null
 
     override suspend fun getCharacter(id: Int): CharacterDetails? {
         val entity = getCachedCharacter(id) ?: loadCharacterFromApi(id)?.also {
