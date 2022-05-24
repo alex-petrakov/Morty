@@ -1,6 +1,7 @@
 package me.alexpetrakov.morty.common.presentation.paging
 
 sealed class PagingState<out T> {
+    object Initial : PagingState<Nothing>()
     object Loading : PagingState<Nothing>()
     object Empty : PagingState<Nothing>()
     data class Error(val e: Exception) : PagingState<Nothing>()

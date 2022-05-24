@@ -4,6 +4,7 @@ import androidx.recyclerview.widget.DiffUtil
 import me.alexpetrakov.morty.common.domain.model.Character
 import me.alexpetrakov.morty.common.domain.repositories.ResourceProvider
 import me.alexpetrakov.morty.common.presentation.mappers.toUiModel
+import me.alexpetrakov.morty.common.presentation.paging.PagingEffect
 import me.alexpetrakov.morty.common.presentation.paging.PagingState
 
 sealed class ViewState {
@@ -39,6 +40,7 @@ data class CharacterUiModel(
 
 fun PagingState<Character>.toViewState(resourceProvider: ResourceProvider): ViewState {
     return when (this) {
+        PagingState.Initial -> ViewState.Loading
         PagingState.Loading -> ViewState.Loading
         PagingState.Empty -> ViewState.Content(emptyList())
         is PagingState.Content -> ViewState.Content(items.toUiModel(resourceProvider))
@@ -57,4 +59,11 @@ fun Character.toUiModel(resourceProvider: ResourceProvider): CharacterUiModel {
     val vitalStatus = vitalStatus.toUiModel(resourceProvider)
     val gender = gender.toUiModel(resourceProvider)
     return CharacterUiModel(id, name, "$vitalStatus · $species · $gender", imageUrl)
+}
+
+fun PagingEffect.toViewEffect(): ViewEffect {
+    return when (this) {
+        is PagingEffect.RefreshError -> ViewEffect.DISPLAY_REFRESH_ERROR
+        is PagingEffect.PageLoadingError -> ViewEffect.DISPLAY_PAGE_LOAD_ERROR
+    }
 }
