@@ -1,6 +1,6 @@
 package me.alexpetrakov.morty.common.data
 
-import me.alexpetrakov.morty.common.data.db.page.PageEntity
+import me.alexpetrakov.morty.common.data.local.db.page.PageEntity
 import me.alexpetrakov.morty.common.domain.model.Character
 import java.time.Instant
 

@@ -1,4 +1,4 @@
-package me.alexpetrakov.morty.common.data.db
+package me.alexpetrakov.morty.common.data.local.db
 
 import androidx.room.TypeConverter
 import me.alexpetrakov.morty.common.domain.model.Gender

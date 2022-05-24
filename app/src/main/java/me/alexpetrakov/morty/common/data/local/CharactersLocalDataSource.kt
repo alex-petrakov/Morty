@@ -1,14 +1,14 @@
-package me.alexpetrakov.morty.common.data.cache
+package me.alexpetrakov.morty.common.data.local
 
 import androidx.room.withTransaction
 import me.alexpetrakov.morty.common.data.Page
-import me.alexpetrakov.morty.common.data.db.CharacterDatabase
-import me.alexpetrakov.morty.common.data.db.character.toDomainModel
-import me.alexpetrakov.morty.common.data.db.character.toEntity
-import me.alexpetrakov.morty.common.data.db.characterdetails.CharacterDetailsEntity
-import me.alexpetrakov.morty.common.data.db.characterdetails.toDomainModel
-import me.alexpetrakov.morty.common.data.db.characterdetails.toEntity
-import me.alexpetrakov.morty.common.data.db.page.PageEntity
+import me.alexpetrakov.morty.common.data.local.db.CharacterDatabase
+import me.alexpetrakov.morty.common.data.local.db.character.toDomainModel
+import me.alexpetrakov.morty.common.data.local.db.character.toEntity
+import me.alexpetrakov.morty.common.data.local.db.characterdetails.CharacterDetailsEntity
+import me.alexpetrakov.morty.common.data.local.db.characterdetails.toDomainModel
+import me.alexpetrakov.morty.common.data.local.db.characterdetails.toEntity
+import me.alexpetrakov.morty.common.data.local.db.page.PageEntity
 import me.alexpetrakov.morty.common.data.toPageEntity
 import me.alexpetrakov.morty.common.domain.model.CharacterDetails
 import java.time.Clock

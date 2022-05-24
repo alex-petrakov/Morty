@@ -1,4 +1,4 @@
-package me.alexpetrakov.morty.common.data.network.converters
+package me.alexpetrakov.morty.common.data.remote.network.converters
 
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.ToJson

@@ -1,4 +1,4 @@
-package me.alexpetrakov.morty.common.data.cache
+package me.alexpetrakov.morty.common.data.local
 
 import javax.inject.Qualifier
 

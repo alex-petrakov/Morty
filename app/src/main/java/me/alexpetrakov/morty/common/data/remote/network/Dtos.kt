@@ -1,4 +1,4 @@
-package me.alexpetrakov.morty.common.data.network
+package me.alexpetrakov.morty.common.data.remote.network
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass

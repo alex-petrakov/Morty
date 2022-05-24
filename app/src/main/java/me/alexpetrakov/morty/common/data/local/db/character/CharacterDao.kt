@@ -1,4 +1,4 @@
-package me.alexpetrakov.morty.common.data.db.character
+package me.alexpetrakov.morty.common.data.local.db.character
 
 import androidx.room.Dao
 import androidx.room.Insert

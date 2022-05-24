@@ -10,9 +10,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import me.alexpetrakov.morty.common.data.AndroidResourceProvider
 import me.alexpetrakov.morty.common.data.CharactersProvider
-import me.alexpetrakov.morty.common.data.cache.CacheLifetime
-import me.alexpetrakov.morty.common.data.db.CharacterDatabase
-import me.alexpetrakov.morty.common.data.network.RickAndMortyApi
+import me.alexpetrakov.morty.common.data.local.CacheLifetime
+import me.alexpetrakov.morty.common.data.local.db.CharacterDatabase
+import me.alexpetrakov.morty.common.data.remote.network.RickAndMortyApi
 import me.alexpetrakov.morty.common.domain.repositories.CharactersRepository
 import me.alexpetrakov.morty.common.domain.repositories.ResourceProvider
 import retrofit2.Retrofit

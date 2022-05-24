@@ -1,7 +1,7 @@
 package me.alexpetrakov.morty.common.data
 
-import me.alexpetrakov.morty.common.data.cache.CharactersLocalDataSource
-import me.alexpetrakov.morty.common.data.network.CharacterRemoteDataSource
+import me.alexpetrakov.morty.common.data.local.CharactersLocalDataSource
+import me.alexpetrakov.morty.common.data.remote.CharacterRemoteDataSource
 import me.alexpetrakov.morty.common.domain.model.Character
 import me.alexpetrakov.morty.common.domain.model.CharacterDetails
 import me.alexpetrakov.morty.common.domain.repositories.CharactersRepository

@@ -1,7 +1,10 @@
-package me.alexpetrakov.morty.common.data.network
+package me.alexpetrakov.morty.common.data.remote
 
 import com.squareup.moshi.JsonDataException
 import me.alexpetrakov.morty.common.data.Page
+import me.alexpetrakov.morty.common.data.remote.network.CharacterPageJson
+import me.alexpetrakov.morty.common.data.remote.network.RickAndMortyApi
+import me.alexpetrakov.morty.common.data.remote.network.toDomainModel
 import me.alexpetrakov.morty.common.domain.model.CharacterDetails
 import retrofit2.HttpException
 import java.io.IOException
