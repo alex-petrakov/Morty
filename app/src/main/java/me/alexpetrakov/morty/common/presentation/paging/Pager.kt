@@ -3,7 +3,7 @@ package me.alexpetrakov.morty.common.presentation.paging
 import kotlinx.coroutines.*
 
 class Pager<T>(
-    private val requestPage: suspend (Int) -> PageRequestResult<T>,
+    private val requestPage: suspend (page: Int, forceRefresh: Boolean) -> PageRequestResult<T>,
     private val viewController: ViewController<T>,
     dispatcher: CoroutineDispatcher = Dispatchers.Main.immediate
 ) {
@@ -30,10 +30,10 @@ class Pager<T>(
         currentState.release()
     }
 
-    private fun loadPage(page: Int) {
+    private fun loadPage(page: Int, forceRefresh: Boolean) {
         lastJob?.cancel()
         lastJob = coroutineScope.launch {
-            when (val result = requestPage(page)) {
+            when (val result = requestPage(page, forceRefresh)) {
                 is PageRequestResult.Success -> currentState.onPageLoaded(
                     result.pageItems,
                     result.hasMorePages
@@ -61,7 +61,7 @@ class Pager<T>(
         override fun refresh() {
             currentState = Loading()
             viewController.setPagingState(PagingState.Loading)
-            loadPage(FIRST_PAGE)
+            loadPage(FIRST_PAGE, forceRefresh = false)
         }
 
         override fun release() {
@@ -100,13 +100,13 @@ class Pager<T>(
         override fun refresh() {
             currentState = Refreshing()
             viewController.setPagingState(PagingState.Refreshing(list))
-            loadPage(FIRST_PAGE)
+            loadPage(FIRST_PAGE, forceRefresh = true)
         }
 
         override fun loadNextPage() {
             currentState = LoadingPage()
             viewController.setPagingState(PagingState.LoadingPage(list))
-            loadPage(currentPage + 1)
+            loadPage(currentPage + 1, forceRefresh = false)
         }
 
         override fun release() {
@@ -119,7 +119,7 @@ class Pager<T>(
 
         override fun refresh() {
             currentState = Loading()
-            loadPage(FIRST_PAGE)
+            loadPage(FIRST_PAGE, forceRefresh = false)
         }
 
         override fun release() {
@@ -132,7 +132,7 @@ class Pager<T>(
 
         override fun refresh() {
             currentState = Loading()
-            loadPage(FIRST_PAGE)
+            loadPage(FIRST_PAGE, forceRefresh = false)
         }
 
         override fun release() {
@@ -172,7 +172,7 @@ class Pager<T>(
         override fun refresh() {
             currentState = Refreshing()
             viewController.setPagingState(PagingState.Refreshing(list))
-            loadPage(FIRST_PAGE)
+            loadPage(FIRST_PAGE, forceRefresh = false)
         }
 
         override fun onPageLoaded(items: List<T>, hasMorePages: Boolean) {
@@ -203,7 +203,7 @@ class Pager<T>(
         override fun refresh() {
             currentState = Refreshing()
             viewController.setPagingState(PagingState.Refreshing(list))
-            loadPage(FIRST_PAGE)
+            loadPage(FIRST_PAGE, forceRefresh = true)
         }
 
         override fun release() {

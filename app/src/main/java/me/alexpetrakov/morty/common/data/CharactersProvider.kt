@@ -15,11 +15,14 @@ class CharactersProvider @Inject constructor(
     private val remoteDataSource: CharacterRemoteDataSource
 ) : CharactersRepository {
 
-    override suspend fun getCharacterPage(key: Int): PageRequestResult<Character> {
-        val page =
-            localDataSource.getPage(key) ?: remoteDataSource.getCharacterPage(key)?.also { page ->
-                localDataSource.storePage(page, false)
-            } ?: return PageRequestResult.Failure(RuntimeException())
+    override suspend fun getCharacterPage(
+        pageId: Int,
+        forceRefresh: Boolean
+    ): PageRequestResult<Character> {
+        val page = localDataSource.getPage(pageId, forceRefresh)
+            ?: remoteDataSource.getCharacterPage(pageId)?.also { page ->
+                localDataSource.storePage(page)
+            } ?: return PageRequestResult.Failure(UnableToLoadPageException())
         return PageRequestResult.Success(page.characters, page.hasMorePages)
     }
 
@@ -29,4 +32,9 @@ class CharactersProvider @Inject constructor(
                 localDataSource.storeCharacterDetails(character)
             }
     }
+
+    class UnableToLoadPageException(
+        message: String = "Unable to load page",
+        cause: Throwable? = null
+    ) : RuntimeException(message, cause)
 }

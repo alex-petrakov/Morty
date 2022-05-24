@@ -32,8 +32,11 @@ class CharactersLocalDataSource @Inject constructor(
         require(!maxCacheLifetime.isNegative) { "Cache lifetime must be positive ($maxCacheLifetime)" }
     }
 
-    suspend fun getPage(id: Int): Page? {
+    suspend fun getPage(id: Int, invalidate: Boolean): Page? {
         return db.withTransaction {
+            if (invalidate) {
+                pageDao.deleteAll()
+            }
             val pageEntity = pageDao.getById(id)
                 ?.takeIf { it.isFresh(now(), maxCacheLifetime) }
                 ?: return@withTransaction null
@@ -47,11 +50,8 @@ class CharactersLocalDataSource @Inject constructor(
         return !lifetime.isNegative && lifetime <= maxLifetime
     }
 
-    suspend fun storePage(page: Page, invalidate: Boolean) {
+    suspend fun storePage(page: Page) {
         db.withTransaction {
-            if (invalidate) {
-                pageDao.deleteAll()
-            }
             pageDao.insert(page.toPageEntity(now()))
             characterDao.insertAll(page.characters.map { it.toEntity(page.id) })
         }
