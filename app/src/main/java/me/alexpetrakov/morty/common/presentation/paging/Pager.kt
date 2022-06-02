@@ -6,13 +6,16 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 class Pager<T>(
     private val requestPage: suspend (page: Int, forceRefresh: Boolean) -> PageRequestResult<T>,
+    hostScope: CoroutineScope,
     dispatcher: CoroutineDispatcher = Dispatchers.Main.immediate
 ) {
 
-    private val coroutineScope = CoroutineScope(SupervisorJob() + dispatcher)
+    private val coroutineScope = hostScope.childScope(context = dispatcher)
 
     private val _pagingState = MutableStateFlow<PagingState<T>>(PagingState.Initial)
     val pagingState: StateFlow<PagingState<T>> get() = _pagingState
@@ -40,11 +43,10 @@ class Pager<T>(
         currentState.loadNextPage()
     }
 
-    fun release() {
-        currentState.release()
-    }
-
     private fun loadPage(page: Int, forceRefresh: Boolean) {
+        if (!coroutineScope.isActive) {
+            throw IllegalStateException("Host Coroutine Scope has been cancelled")
+        }
         lastJob?.cancel()
         lastJob = coroutineScope.launch {
             when (val result = requestPage(page, forceRefresh)) {
@@ -57,13 +59,18 @@ class Pager<T>(
         }
     }
 
+    private fun CoroutineScope.childScope(
+        context: CoroutineContext = EmptyCoroutineContext
+    ): CoroutineScope {
+        val parentJob = coroutineContext[Job]
+        return CoroutineScope(coroutineContext + SupervisorJob(parent = parentJob)) + context
+    }
+
     private interface State<T> {
 
         fun refresh() {}
 
         fun loadNextPage() {}
-
-        fun release() {}
 
         fun onPageLoaded(items: List<T>, hasMorePages: Boolean) {}
 
@@ -76,11 +83,6 @@ class Pager<T>(
             currentState = Loading()
             _pagingState.value = PagingState.Loading
             loadPage(FIRST_PAGE, forceRefresh = false)
-        }
-
-        override fun release() {
-            currentState = Released()
-            coroutineScope.cancel()
         }
     }
 
@@ -102,11 +104,6 @@ class Pager<T>(
             currentState = Error()
             _pagingState.value = PagingState.Error(e)
         }
-
-        override fun release() {
-            currentState = Released()
-            coroutineScope.cancel()
-        }
     }
 
     private inner class Content : State<T> {
@@ -122,11 +119,6 @@ class Pager<T>(
             _pagingState.value = PagingState.LoadingPage(list)
             loadPage(currentPage + 1, forceRefresh = false)
         }
-
-        override fun release() {
-            currentState = Released()
-            coroutineScope.cancel()
-        }
     }
 
     private inner class Error : State<T> {
@@ -135,11 +127,6 @@ class Pager<T>(
             currentState = Loading()
             loadPage(FIRST_PAGE, forceRefresh = false)
         }
-
-        override fun release() {
-            currentState = Released()
-            coroutineScope.cancel()
-        }
     }
 
     private inner class Empty : State<T> {
@@ -147,11 +134,6 @@ class Pager<T>(
         override fun refresh() {
             currentState = Loading()
             loadPage(FIRST_PAGE, forceRefresh = false)
-        }
-
-        override fun release() {
-            currentState = Released()
-            coroutineScope.cancel()
         }
     }
 
@@ -173,11 +155,6 @@ class Pager<T>(
             currentState = Content()
             _pagingState.value = PagingState.Content(list)
             _pagingEffect.tryEmit(PagingEffect.RefreshError(e))
-        }
-
-        override fun release() {
-            currentState = Released()
-            coroutineScope.cancel()
         }
     }
 
@@ -205,11 +182,6 @@ class Pager<T>(
             currentState = Content()
             _pagingEffect.tryEmit(PagingEffect.PageLoadingError(e))
         }
-
-        override fun release() {
-            currentState = Released()
-            coroutineScope.cancel()
-        }
     }
 
     private inner class AllContent : State<T> {
@@ -219,25 +191,6 @@ class Pager<T>(
             _pagingState.value = PagingState.Refreshing(list)
             loadPage(FIRST_PAGE, forceRefresh = true)
         }
-
-        override fun release() {
-            currentState = Released()
-            coroutineScope.cancel()
-        }
-    }
-
-    private inner class Released : State<T> {
-
-        override fun refresh() = throw IllegalStateException("Pager has been released")
-
-        override fun loadNextPage() = throw IllegalStateException("Pager has been released")
-
-        override fun onPageLoaded(items: List<T>, hasMorePages: Boolean) =
-            throw IllegalStateException("Pager has been released")
-
-        override fun onError(e: Exception) = throw IllegalStateException("Pager has been released")
-
-        override fun release() = throw IllegalStateException("Pager has been released")
     }
 
     companion object {

@@ -19,7 +19,7 @@ class CharactersViewModel @Inject constructor(
     private val router: Router
 ) : ViewModel() {
 
-    private val pager: Pager<Character> = Pager(repository::getCharacterPage)
+    private val pager: Pager<Character> = Pager(repository::getCharacterPage, viewModelScope)
 
     val viewState: StateFlow<ViewState> = pager.pagingState
         .map { pagingState -> pagingState.toViewState(resourceProvider) }
@@ -43,9 +43,5 @@ class CharactersViewModel @Inject constructor(
 
     fun onCharacterClicked(character: CharacterUiModel) {
         router.navigateTo(AppScreens.characterDetails(character.id))
-    }
-
-    override fun onCleared() {
-        pager.release()
     }
 }
