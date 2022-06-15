@@ -8,8 +8,8 @@ import me.alexpetrakov.morty.common.presentation.paging.PagingEffect
 import me.alexpetrakov.morty.common.presentation.paging.PagingState
 
 sealed class ViewState {
-    data class Content(val characters: List<CharacterUiModel>) : ViewState()
-    data class Refreshing(val characters: List<CharacterUiModel>) : ViewState()
+    data class Content(val characters: List<ListItem>) : ViewState()
+    data class Refreshing(val characters: List<ListItem>) : ViewState()
     object Error : ViewState()
     object Loading : ViewState()
 }
@@ -19,22 +19,44 @@ enum class ViewEffect {
     DISPLAY_PAGE_LOAD_ERROR
 }
 
+sealed interface ListItem {
+
+    object DiffUtilCallback : DiffUtil.ItemCallback<ListItem>() {
+
+        override fun areItemsTheSame(oldItem: ListItem, newItem: ListItem): Boolean {
+            return oldItem.sameAs(newItem)
+        }
+
+        override fun areContentsTheSame(oldItem: ListItem, newItem: ListItem): Boolean {
+            return oldItem.hasSameContentWith(newItem)
+        }
+    }
+
+    fun sameAs(other: ListItem): Boolean
+
+    fun hasSameContentWith(other: ListItem): Boolean
+}
+
 data class CharacterUiModel(
     val id: Int,
     val name: String,
     val description: String,
     val imageUrl: String
-) {
+) : ListItem {
 
-    object DiffUtilCallback : DiffUtil.ItemCallback<CharacterUiModel>() {
-        override fun areItemsTheSame(old: CharacterUiModel, new: CharacterUiModel): Boolean {
-            return old.id == new.id
-        }
-
-        override fun areContentsTheSame(old: CharacterUiModel, new: CharacterUiModel): Boolean {
-            return old == new
-        }
+    override fun sameAs(other: ListItem): Boolean {
+        return other is CharacterUiModel && this.id == other.id
     }
+
+    override fun hasSameContentWith(other: ListItem): Boolean {
+        return this == (other as CharacterUiModel)
+    }
+}
+
+object LoadIndicator : ListItem {
+    override fun sameAs(other: ListItem): Boolean = true
+
+    override fun hasSameContentWith(other: ListItem): Boolean = true
 }
 
 
@@ -45,7 +67,9 @@ fun PagingState<Character>.toViewState(resourceProvider: ResourceProvider): View
         PagingState.Empty -> ViewState.Content(emptyList())
         is PagingState.Content -> ViewState.Content(items.toUiModel(resourceProvider))
         is PagingState.Error -> ViewState.Error
-        is PagingState.LoadingPage -> ViewState.Content(items.toUiModel(resourceProvider))
+        is PagingState.LoadingPage -> ViewState.Content(
+            items.toUiModel(resourceProvider) + LoadIndicator
+        )
         is PagingState.Refreshing -> ViewState.Refreshing(items.toUiModel(resourceProvider))
     }
 }
