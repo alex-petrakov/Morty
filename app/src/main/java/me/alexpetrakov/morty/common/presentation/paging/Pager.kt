@@ -125,6 +125,7 @@ class Pager<T>(
 
         override fun refresh() {
             currentState = Loading()
+            _pagingState.value = PagingState.Loading
             loadPage(FIRST_PAGE, forceRefresh = false)
         }
     }
@@ -133,6 +134,7 @@ class Pager<T>(
 
         override fun refresh() {
             currentState = Loading()
+            _pagingState.value = PagingState.Loading
             loadPage(FIRST_PAGE, forceRefresh = false)
         }
     }
