@@ -11,12 +11,15 @@ import me.alexpetrakov.morty.R
 import me.alexpetrakov.morty.characters.presentation.CharacterUiModel
 import me.alexpetrakov.morty.characters.presentation.ListItem
 import me.alexpetrakov.morty.characters.presentation.LoadIndicator
+import me.alexpetrakov.morty.characters.presentation.PageLoadError
 import me.alexpetrakov.morty.databinding.ItemCharacterBinding
+import me.alexpetrakov.morty.databinding.ItemPageLoadErrorBinding
 import me.alexpetrakov.morty.databinding.ItemPageLoadIndicatorBinding
 
 class CharactersAdapter(
     private val fragment: Fragment,
     private val onCharacterClick: (character: CharacterUiModel) -> Unit,
+    private val onRetryPageLoad: () -> Unit,
     private val onRequestNextPage: () -> Unit
 ) : ListAdapter<ListItem, RecyclerView.ViewHolder>(ListItem.DiffUtilCallback) {
 
@@ -37,6 +40,10 @@ class CharactersAdapter(
                 val binding = ItemPageLoadIndicatorBinding.inflate(layoutInflater, parent, false)
                 LoadIndicatorViewHolder(binding)
             }
+            R.layout.item_page_load_error -> {
+                val binding = ItemPageLoadErrorBinding.inflate(layoutInflater, parent, false)
+                LoadPageErrorViewHolder(binding, onRetryPageLoad)
+            }
             else -> throw IllegalStateException("Unexpected view type $viewType")
         }
     }
@@ -48,6 +55,7 @@ class CharactersAdapter(
         when (holder) {
             is CharacterViewHolder -> holder.bind(getItem(position) as CharacterUiModel)
             is LoadIndicatorViewHolder -> {}
+            is LoadPageErrorViewHolder -> {}
             else -> throw IllegalStateException("Unexpected view holder type ${holder::class}")
         }
     }
@@ -56,6 +64,7 @@ class CharactersAdapter(
         return when (getItem(position)) {
             is CharacterUiModel -> R.layout.item_character
             is LoadIndicator -> R.layout.item_page_load_indicator
+            is PageLoadError -> R.layout.item_page_load_error
             else -> throw IllegalStateException(
                 "Unexpected item type ${getItem(position)::class} at position $position"
             )
@@ -98,4 +107,13 @@ class CharactersAdapter(
     class LoadIndicatorViewHolder(
         binding: ItemPageLoadIndicatorBinding
     ) : RecyclerView.ViewHolder(binding.root)
+
+    class LoadPageErrorViewHolder(
+        binding: ItemPageLoadErrorBinding,
+        private val onRetry: () -> Unit
+    ) : RecyclerView.ViewHolder(binding.root) {
+        init {
+            binding.retryButton.setOnClickListener { onRetry() }
+        }
+    }
 }

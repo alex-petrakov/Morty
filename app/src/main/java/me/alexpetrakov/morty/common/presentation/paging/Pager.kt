@@ -181,8 +181,24 @@ class Pager<T>(
         }
 
         override fun onError(e: Exception) {
-            currentState = Content()
+            currentState = PageLoadError()
+            _pagingState.value = PagingState.PageLoadError(list)
             _pagingEffect.tryEmit(PagingEffect.PageLoadingError(e))
+        }
+    }
+
+    private inner class PageLoadError : State<T> {
+
+        override fun refresh() {
+            currentState = Refreshing()
+            _pagingState.value = PagingState.Refreshing(list)
+            loadPage(FIRST_PAGE, forceRefresh = false)
+        }
+
+        override fun loadNextPage() {
+            currentState = LoadingPage()
+            _pagingState.value = PagingState.LoadingPage(list)
+            loadPage(currentPage + 1, forceRefresh = false)
         }
     }
 

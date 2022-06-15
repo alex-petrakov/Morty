@@ -33,7 +33,8 @@ class CharactersFragment : Fragment() {
     private val charactersAdapter = CharactersAdapter(
         this,
         onCharacterClick = { character -> viewModel.onCharacterClicked(character) },
-        onRequestNextPage = { viewModel.onLoadNextPage() }
+        onRequestNextPage = { viewModel.onLoadNextPage() },
+        onRetryPageLoad = { viewModel.onLoadNextPage() }
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -102,11 +103,7 @@ class CharactersFragment : Fragment() {
 
     private fun handle(viewEffect: ViewEffect): Unit = with(binding) {
         when (viewEffect) {
-            ViewEffect.DISPLAY_PAGE_LOAD_ERROR -> Snackbar.make(
-                root,
-                "Unable to load page",
-                Snackbar.LENGTH_SHORT
-            ).show()
+            ViewEffect.DISPLAY_PAGE_LOAD_ERROR -> {}
             ViewEffect.DISPLAY_REFRESH_ERROR -> Snackbar.make(
                 root,
                 R.string.app_unable_to_refresh,

@@ -54,9 +54,15 @@ data class CharacterUiModel(
 }
 
 object LoadIndicator : ListItem {
-    override fun sameAs(other: ListItem): Boolean = true
+    override fun sameAs(other: ListItem): Boolean = other is LoadIndicator
 
     override fun hasSameContentWith(other: ListItem): Boolean = true
+}
+
+object PageLoadError : ListItem {
+    override fun sameAs(other: ListItem): Boolean = other is PageLoadError
+
+    override fun hasSameContentWith(other: ListItem): Boolean = false
 }
 
 
@@ -69,6 +75,9 @@ fun PagingState<Character>.toViewState(resourceProvider: ResourceProvider): View
         is PagingState.Error -> ViewState.Error
         is PagingState.LoadingPage -> ViewState.Content(
             items.toUiModel(resourceProvider) + LoadIndicator
+        )
+        is PagingState.PageLoadError -> ViewState.Content(
+            items.toUiModel(resourceProvider) + PageLoadError
         )
         is PagingState.Refreshing -> ViewState.Refreshing(items.toUiModel(resourceProvider))
     }
