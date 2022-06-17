@@ -171,6 +171,8 @@ class Pager<T>(
         override fun onPageLoaded(items: List<T>, hasMorePages: Boolean) {
             if (items.isEmpty() || !hasMorePages) {
                 currentState = AllContent()
+                list = list + items
+                currentPage++
                 _pagingState.value = PagingState.Content(list)
             } else {
                 currentState = Content()
